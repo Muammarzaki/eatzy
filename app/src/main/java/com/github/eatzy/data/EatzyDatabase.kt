@@ -4,8 +4,20 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 
-@Database(entities = [Unit::class], version = 1)
+@Database(
+    entities = [
+        UserEntity::class,
+        BusinessEntity::class,
+        FoodItemEntity::class,
+        RecipientEntity::class,
+        DistributionEntity::class,
+        LeftoverFoodEntity::class
+    ],
+    version = 1
+)
+@TypeConverters(DatabaseTypeConverter::class)
 abstract class EatzyDatabase : RoomDatabase() {
     companion object {
         @Volatile

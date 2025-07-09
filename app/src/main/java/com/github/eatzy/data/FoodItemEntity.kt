@@ -34,5 +34,5 @@ data class FoodItemEntity(
     val initialQuantity: Float,
     val unit: FoodUnit,
     @ColumnInfo(name = "input_date")
-    val inputDate: Date = Date() // Default to current date/time
+    val inputDate: Date = Date()
 )
