@@ -18,7 +18,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.github.eatzy.ui.theme.EaTzyTheme
-import com.github.eatzy.ui.theme.LightGreen40
 
 @Composable
 fun SplashScreen(onGetStartedClick: () -> Unit) {
@@ -26,7 +25,7 @@ fun SplashScreen(onGetStartedClick: () -> Unit) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.primary),
+                .background(MaterialTheme.colorScheme.tertiaryContainer),
         ) {
             Text(
                 text = "Food Wasted",
@@ -36,7 +35,7 @@ fun SplashScreen(onGetStartedClick: () -> Unit) {
                 modifier = Modifier.align(Alignment.Center)
             )
             Button(
-                colors = ButtonDefaults.buttonColors(containerColor = LightGreen40),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onTertiaryContainer),
                 onClick = onGetStartedClick, modifier = Modifier
                     .padding(bottom = 75.dp, start = 77.dp, end = 77.dp)
                     .align(Alignment.BottomCenter)

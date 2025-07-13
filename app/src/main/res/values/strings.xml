@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">EaTzy</string>
+
+    <string-array name="food_unit">
+        <item>Kilogram</item>
+        <item>PCS</item>
+        <item>Liter</item>
+        <item>Bungkus</item>
+        <item>Porsi</item>
+    </string-array>
+
+    <string name="food_stock" >Stok Makanan</string>
+    <string name="food_wasted" >Sisa Makanan</string>
+    <string name="distribution_send">Kirim</string>
+    <string name="distribution_sent">Terkirim</string>
 </resources>

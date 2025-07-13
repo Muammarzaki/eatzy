@@ -48,6 +48,7 @@ dependencies {
     implementation(libs.vico.compose.m3)
     implementation(libs.vico.compose)
     implementation(libs.androidx.material.icons.extended.android)
+    implementation(libs.androidx.navigation.compose.jvmstubs)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.core.ktx)

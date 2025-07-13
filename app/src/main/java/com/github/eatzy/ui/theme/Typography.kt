@@ -31,6 +31,12 @@ val Inter18Font = FontFamily(
 )
 
 val AppTypography = Typography(
+    // Default text style
+    bodyMedium = TextStyle(
+        fontFamily = Inter18Font,
+        fontWeight = FontWeight.Normal,
+        fontSize = 14.sp
+    ),
     bodyLarge = TextStyle(
         fontFamily = Inter18Font,
         fontWeight = FontWeight.Normal,
@@ -45,7 +51,16 @@ val AppTypography = Typography(
         fontFamily = Inter18Font,
         fontWeight = FontWeight.Medium,
         fontSize = 12.sp
+    ),
+    headlineLarge = TextStyle(
+        fontFamily = Inter18Font,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 32.sp
+    ),
+    displayLarge = TextStyle(
+        fontFamily = Inter18Font,
+        fontWeight = FontWeight.Bold,
+        fontSize = 57.sp
     )
-    // You can define more styles as needed
 )
 

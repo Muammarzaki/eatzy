@@ -71,7 +71,7 @@ fun LoginScreen() {
                 onDismissRequest = {},
                 sheetState = sheetState,
                 scrimColor = Color.Transparent,
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer
             ) {
                 if (optionState == "login") {
                     LoginFormComponent(
