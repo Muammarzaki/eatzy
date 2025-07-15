@@ -1,6 +1,8 @@
 package com.github.eatzy.domain
 
-enum class DistributionOption {
-    Send,
-    Sent
+enum class DistributionOption(val label: String) {
+    Send("Send"),
+    Sent("Sent");
+
+    override fun toString(): String = label
 }

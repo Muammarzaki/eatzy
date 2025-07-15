@@ -420,6 +420,6 @@ fun RegularButton(
 @Composable
 private fun RegularButtonPreview() {
     EaTzyTheme {
-        RegularButton(onClick = {}, text =  "Test Button")
+        RegularButton(onClick = {}, text = "Test Button")
     }
 }

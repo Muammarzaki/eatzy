@@ -13,23 +13,27 @@ import androidx.room.TypeConverters
         FoodItemEntity::class,
         RecipientEntity::class,
         DistributionEntity::class,
-        LeftoverFoodEntity::class
+        WastedFoodEntity::class,
+        UnreadableNotificationEntity::class,
     ],
-    version = 1
+    version = 4
 )
 @TypeConverters(DatabaseTypeConverter::class)
 abstract class EatzyDatabase : RoomDatabase() {
+    abstract fun eatzyDao(): EatzyDao
+
     companion object {
         @Volatile
         private var INSTANCE: EatzyDatabase? = null
 
-        fun getDatabase(context: Context): EatzyDatabase {
+        fun getInstance(context: Context): EatzyDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     EatzyDatabase::class.java,
                     "eatzy_database"
-                ).build()
+                ).fallbackToDestructiveMigration(true)
+                    .build()
                 INSTANCE = instance
                 instance
             }

@@ -19,7 +19,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,13 +33,14 @@ import com.github.eatzy.ui.theme.EaTzyTheme
 
 
 @Composable
-fun ProfileScreen() {
-    Surface(
-        color = MaterialTheme.colorScheme.onTertiaryContainer,
-        modifier = Modifier.fillMaxSize()
-    ) {
+fun ProfileScreen(bottomBar: @Composable () -> Unit = {}) {
+    Scaffold(
+        bottomBar = bottomBar,
+        containerColor = MaterialTheme.colorScheme.tertiaryContainer
+    ) { innerPadding ->
         Column(
             modifier = Modifier
+                .padding(innerPadding)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)

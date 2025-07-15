@@ -11,7 +11,7 @@ import java.util.Date
     tableName = "distributions",
     foreignKeys = [
         ForeignKey(
-            entity = LeftoverFoodEntity::class,
+            entity = WastedFoodEntity::class,
             parentColumns = ["id"],
             childColumns = ["leftover_food_id"],
             onDelete = ForeignKey.CASCADE

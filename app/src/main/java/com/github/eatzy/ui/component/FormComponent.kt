@@ -2,21 +2,28 @@ package com.github.eatzy.ui.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
@@ -53,6 +60,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.paging.PagingData
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.github.eatzy.domain.FoodCondition
 import com.github.eatzy.domain.FoodForm
 import com.github.eatzy.domain.FoodItem
@@ -60,11 +70,85 @@ import com.github.eatzy.domain.FoodUnit
 import com.github.eatzy.domain.WastedFood
 import com.github.eatzy.ui.theme.DarkGreen
 import com.github.eatzy.ui.theme.EaTzyTheme
+import kotlinx.coroutines.flow.flowOf
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
+@Composable
+fun FoodHistorySelectorDialog(
+    isOpen: Boolean,
+    foodList: LazyPagingItems<FoodItem> = flowOf(PagingData.empty<FoodItem>()).collectAsLazyPagingItems(),
+    onDismiss: () -> Unit,
+    onItemSelected: (FoodItem) -> Unit
+) {
+    if (isOpen) {
+        AlertDialog(
+            modifier = Modifier.aspectRatio(9 / 16f),
+            onDismissRequest = onDismiss,
+            confirmButton = {},
+            title = {
+                Text(text = "Pilih Makanan", style = MaterialTheme.typography.titleLarge)
+            },
+            text = {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .offset(5.dp)
+                ) {
+                    items(foodList.itemCount) { index ->
+                        foodList[index]?.let { item ->
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onItemSelected(item) }
+                                    .padding(vertical = 8.dp)
+                            ) {
+                                Text(
+                                    text = item.foodName,
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                                Text(
+                                    text = item.inputDate.toString(),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color.Gray
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        )
+    }
+}
+
+
+@Preview
+@Composable
+private fun DialogSelectorPreview() {
+    EaTzyTheme {
+        FoodHistorySelectorDialog(
+            isOpen = true,
+            foodList = flowOf(PagingData.from((1..20).map { index ->
+                FoodItem(
+                    id = index,
+                    foodName = "Makanan Contoh $index",
+                    inputDate = Date(),
+                    foodType = "Main Course",
+                    expirationDate = Date(),
+                    initialQuantity = 1.0,
+                    unit = FoodUnit.PORTION
+                )
+            }
+            )
+            ).collectAsLazyPagingItems(),
+            onItemSelected = {},
+            onDismiss = {}
+        )
+    }
+}
 
 @Composable
 fun WhiteInputTextField(
@@ -339,9 +423,10 @@ private fun LoginComponentPreview() {
 @Composable
 fun RegistrationFormComponent(
     modifier: Modifier = Modifier,
-    onRegisterClicked: (String, String, String, String, String) -> Unit,
+    onRegisterClicked: (FoodMerchantRegistrationData) -> Unit,
     onAlreadyHaveAccountClicked: () -> Unit,
 ) {
+    var ownerName by remember { mutableStateOf("") }
     var businessName by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
@@ -353,32 +438,22 @@ fun RegistrationFormComponent(
             .padding(16.dp),
     ) {
         WhiteInputTextField(
-            value = businessName,
-            onValueChange = { businessName = it },
+            value = ownerName,
+            onValueChange = { ownerName = it },
             placeholder = {
                 Text(
-                    "Business name",
+                    "Owner Name",
                     color = MaterialTheme.colorScheme.outline,
                     fontWeight = FontWeight.SemiBold
                 )
             },
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Phone,
+                imeAction = ImeAction.Next
+            )
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        WhiteInputTextField(
-            value = address,
-            onValueChange = { address = it },
-            placeholder = {
-                Text(
-                    "Address",
-                    color = MaterialTheme.colorScheme.outline,
-                    fontWeight = FontWeight.SemiBold
-                )
-            },
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
-        )
-        Spacer(modifier = Modifier.height(16.dp))
 
         WhiteInputTextField(
             value = phoneNumber,
@@ -414,6 +489,33 @@ fun RegistrationFormComponent(
         )
         Spacer(modifier = Modifier.height(16.dp))
         WhiteInputTextField(
+            value = businessName,
+            onValueChange = { businessName = it },
+            placeholder = {
+                Text(
+                    "Business name",
+                    color = MaterialTheme.colorScheme.outline,
+                    fontWeight = FontWeight.SemiBold
+                )
+            },
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        WhiteInputTextField(
+            value = address,
+            onValueChange = { address = it },
+            placeholder = {
+                Text(
+                    "Address",
+                    color = MaterialTheme.colorScheme.outline,
+                    fontWeight = FontWeight.SemiBold
+                )
+            },
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        WhiteInputTextField(
             value = password,
             onValueChange = { password = it },
             placeholder = {
@@ -441,7 +543,18 @@ fun RegistrationFormComponent(
         }
         Spacer(modifier = Modifier.height(16.dp))
         WhiteButton(
-            onClick = { onRegisterClicked(businessName, address, phoneNumber, email, password) },
+            onClick = {
+                onRegisterClicked(
+                    FoodMerchantRegistrationData(
+                        ownerName = ownerName,
+                        businessName = businessName,
+                        address = address,
+                        phoneNumber = phoneNumber,
+                        email = email,
+                        password = password
+                    )
+                )
+            },
             modifier = Modifier
                 .wrapContentSize()
                 .align(Alignment.CenterHorizontally),
@@ -451,13 +564,22 @@ fun RegistrationFormComponent(
     }
 }
 
+data class FoodMerchantRegistrationData(
+    val ownerName: String,
+    val businessName: String,
+    val address: String,
+    val phoneNumber: String,
+    val email: String,
+    val password: String
+)
+
 @Preview
 @Composable
 private fun RegistrationFormPreview() {
     EaTzyTheme {
         RegistrationFormComponent(
             modifier = Modifier.background(MaterialTheme.colorScheme.tertiaryContainer),
-            onRegisterClicked = { _, _, _, _, _ -> },
+            onRegisterClicked = { },
             onAlreadyHaveAccountClicked = {},
         )
 
@@ -470,47 +592,69 @@ fun WhiteInputTextFieldWithBorder(
     modifier: Modifier = Modifier,
     trailingIcon: @Composable (() -> Unit)? = null,
     readOnly: Boolean = false,
+    enabled: Boolean = true,
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
     borderColor: Color = MaterialTheme.colorScheme.primary,
-    shape: Shape = RoundedCornerShape(20)
+    shape: Shape = RoundedCornerShape(20),
+    onClick: (() -> Unit)? = null
 ) {
-    OutlinedTextField(
-        keyboardOptions = keyboardOptions,
-        trailingIcon = trailingIcon,
-        readOnly = readOnly,
-        value = value,
-        onValueChange = onValueChange,
-        placeholder = { Text(text = placeholder, color = Color.Gray) },
+    val interactionSource = remember { MutableInteractionSource() }
+    Box(
         modifier = modifier
             .fillMaxWidth()
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = { onClick?.invoke() }
+            )
             .border(5.dp, MaterialTheme.colorScheme.onTertiaryContainer, shape = shape)
             .padding(4.dp)
-            .border(2.dp, borderColor, shape = shape),
-        shape = shape,
-        colors = OutlinedTextFieldDefaults.colors(
-            unfocusedContainerColor = Color.White,
-            focusedContainerColor = Color.White,
-            focusedBorderColor = MaterialTheme.colorScheme.primary,
-            unfocusedBorderColor = borderColor
+            .border(2.dp, borderColor, shape = shape)
+    ) {
+        OutlinedTextField(
+            keyboardOptions = keyboardOptions,
+            value = value,
+            onValueChange = onValueChange,
+            placeholder = { Text(text = placeholder, color = Color.Gray) },
+            readOnly = readOnly,
+            enabled = enabled,
+            trailingIcon = trailingIcon,
+            shape = shape,
+            interactionSource = interactionSource,
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                disabledContainerColor = Color.White,
+                disabledTextColor = Color.Black,
+                disabledPlaceholderColor = Color.Gray,
+                disabledBorderColor = Color.Transparent,
+                disabledTrailingIconColor = Color.Black,
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White,
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = borderColor
+            )
         )
-    )
+    }
 }
+
 
 @Composable
 fun WastedFoodInputForm(
     modifier: Modifier = Modifier,
     onSubmitted: (WastedFood) -> Unit,
-    initialData: WastedFood? = null
+    initialData: WastedFood? = null,
+    foodItems: LazyPagingItems<FoodItem> = flowOf(PagingData.empty<FoodItem>()).collectAsLazyPagingItems()
 ) {
     var foodName by remember { mutableStateOf(initialData?.foodItem ?: "") }
+    var foodItemId by remember { mutableStateOf(initialData?.foodItemId ?: 0) }
     val (selectedFoodForm, onFoodFormSelected) = remember { mutableStateOf(FoodForm.entries.first()) }
     var quantity by remember { mutableStateOf(initialData?.leftoverQuantity?.toString() ?: "") }
     var unit by remember { mutableStateOf(initialData?.unit ?: FoodUnit.KILOGRAM) }
     var condition by remember { mutableStateOf(initialData?.condition ?: FoodCondition.DISPOSED) }
     var expiryDate by remember { mutableStateOf(initialData?.expirationDate ?: Date()) }
-
+    var modalState by remember { mutableStateOf(false) }
     Box(modifier = modifier) {
         Column(
             modifier = Modifier
@@ -533,8 +677,23 @@ fun WastedFoodInputForm(
             WhiteInputTextFieldWithBorder(
                 value = foodName,
                 onValueChange = { foodName = it },
+                readOnly = true,
+                enabled = false,
                 placeholder = "Nama Makanan",
-                borderColor = DarkGreen
+                borderColor = DarkGreen,
+                onClick = {
+                    modalState = true
+                }
+            )
+            FoodHistorySelectorDialog(
+                isOpen = modalState,
+                foodList = foodItems,
+                onDismiss = { modalState = false },
+                onItemSelected = {
+                    foodName = it.foodName
+                    foodItemId = it.id ?: 0
+                    modalState = false
+                }
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
@@ -636,12 +795,13 @@ fun WastedFoodInputForm(
             onClick = {
                 onSubmitted(
                     WastedFood(
-                        foodItem = foodName,
+                        foodItemId = foodItemId,
                         leftoverQuantity = quantity.toDoubleOrNull() ?: 0.0,
                         unit = unit,
                         condition = condition,
                         expirationDate = expiryDate,
                         form = selectedFoodForm,
+                        foodItem = foodName
                     )
                 )
             },
@@ -660,19 +820,24 @@ fun WastedFoodInputForm(
 @Composable
 fun WastedFoodInputFormPreview() {
     EaTzyTheme {
+        val foodItems = flowOf(PagingData.from(emptyList<FoodItem>())).collectAsLazyPagingItems()
         WastedFoodInputForm(
             modifier = Modifier.background(MaterialTheme.colorScheme.tertiaryContainer),
             onSubmitted = {},
             initialData = WastedFood(
-                foodItem = "Nasi Goreng",
+                foodItemId = 1,
                 leftoverQuantity = 2.0,
                 unit = FoodUnit.PORTION,
                 condition = FoodCondition.EDIBLE,
-                expirationDate = Calendar.getInstance().apply {
-                    add(Calendar.DAY_OF_YEAR, 2)
-                }.time,
+                expirationDate = Calendar
+                    .getInstance()
+                    .apply {
+                        add(Calendar.DAY_OF_YEAR, 2)
+                    }.time,
                 form = FoodForm.SOLID,
-            )
+                foodItem = "Nasi Goreng"
+            ),
+            foodItems = foodItems
         )
     }
 }

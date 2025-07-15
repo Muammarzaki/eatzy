@@ -45,10 +45,14 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.paging.runtime)
+    implementation(libs.androidx.paging.compose)
     implementation(libs.vico.compose.m3)
     implementation(libs.vico.compose)
     implementation(libs.androidx.material.icons.extended.android)
-    implementation(libs.androidx.navigation.compose.jvmstubs)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.room.paging)
+    implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.core.ktx)

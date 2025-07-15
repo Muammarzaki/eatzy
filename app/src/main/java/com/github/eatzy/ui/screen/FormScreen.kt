@@ -9,14 +9,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.paging.PagingData
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.github.eatzy.domain.FoodItem
 import com.github.eatzy.domain.FoodOption
+import com.github.eatzy.domain.WastedFood
 import com.github.eatzy.ui.component.FoodInputForm
 import com.github.eatzy.ui.component.TopAppBarComponent
 import com.github.eatzy.ui.component.WastedFoodInputForm
 import com.github.eatzy.ui.theme.EaTzyTheme
+import kotlinx.coroutines.flow.flowOf
 
 @Composable
-fun FoodFormScreen(onBackClicked: () -> Unit = {}, option: FoodOption) {
+fun FoodFormScreen(
+    onBackClicked: () -> Unit = {},
+    lazyFoodItem: LazyPagingItems<FoodItem> ,
+    option: FoodOption,
+    onSubmitted: (FoodItem?, WastedFood?) -> Unit = { _, _ -> }
+) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.tertiaryContainer,
         topBar = {
@@ -35,15 +46,16 @@ fun FoodFormScreen(onBackClicked: () -> Unit = {}, option: FoodOption) {
             if (option == FoodOption.Stock) {
                 FoodInputForm(
                     onSubmitted = {
-
+                        onSubmitted(it, null)
                     }
                 )
             }
             if (option == FoodOption.Wasted) {
                 WastedFoodInputForm(
                     onSubmitted = {
-
-                    }
+                        onSubmitted(null, it)
+                    },
+                    foodItems = lazyFoodItem,
                 )
             }
         }
@@ -55,7 +67,8 @@ fun FoodFormScreen(onBackClicked: () -> Unit = {}, option: FoodOption) {
 fun FoodFormScreenPreview() {
     EaTzyTheme {
         FoodFormScreen(
-            option = FoodOption.Stock
+            option = FoodOption.Stock,
+            lazyFoodItem = flowOf(PagingData.empty<FoodItem>()).collectAsLazyPagingItems()
         )
     }
 }
@@ -65,7 +78,8 @@ fun FoodFormScreenPreview() {
 fun WastedFormScreenPreview() {
     EaTzyTheme {
         FoodFormScreen(
-            option = FoodOption.Wasted
+            option = FoodOption.Wasted,
+            lazyFoodItem = flowOf(PagingData.empty<FoodItem>()).collectAsLazyPagingItems()
         )
     }
 }

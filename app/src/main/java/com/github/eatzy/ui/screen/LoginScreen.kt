@@ -34,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.github.eatzy.R
+import com.github.eatzy.ui.component.FoodMerchantRegistrationData
 import com.github.eatzy.ui.component.LoginFormComponent
 import com.github.eatzy.ui.component.RegistrationFormComponent
 import com.github.eatzy.ui.component.WhiteButton
@@ -41,7 +42,10 @@ import com.github.eatzy.ui.theme.EaTzyTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen() {
+fun LoginScreen(
+    onLoginClicked: ((String, String) -> Unit)? = null,
+    onRegisterClicked: ((FoodMerchantRegistrationData) -> Unit)? = null,
+) {
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
         confirmValueChange = { false }
@@ -75,14 +79,14 @@ fun LoginScreen() {
             ) {
                 if (optionState == "login") {
                     LoginFormComponent(
-                        onLoginClicked = { _, _ -> },
+                        onLoginClicked = onLoginClicked ?: { _, _ -> },
                         onForgotPasswordClicked = { optionState = "register" },
                     )
                 }
 
                 if (optionState == "register") {
                     RegistrationFormComponent(
-                        onRegisterClicked = { _, _, _, _, _ -> },
+                        onRegisterClicked = onRegisterClicked ?: { _ -> },
                         onAlreadyHaveAccountClicked = { optionState = "login" },
                     )
                 }

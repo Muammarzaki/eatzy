@@ -16,15 +16,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.github.eatzy.domain.DistributionOption
-import com.github.eatzy.ui.component.DistributionInfoCard
-import com.github.eatzy.ui.component.DistributionToggle
 import com.github.eatzy.ui.component.SimpleNotificationCard
 import com.github.eatzy.ui.component.TopAppBarComponent
 import com.github.eatzy.ui.theme.EaTzyTheme
 
 @Composable
 fun NotificationScreen(onBackClick: () -> Unit) {
-    var tabState by remember { mutableStateOf(DistributionOption.Send) }
     Scaffold(
         containerColor = MaterialTheme.colorScheme.tertiaryContainer,
         topBar = {

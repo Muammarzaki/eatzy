@@ -40,7 +40,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -58,55 +57,33 @@ import androidx.compose.ui.unit.dp
 import com.github.eatzy.R
 import com.github.eatzy.domain.DistributionOption
 import com.github.eatzy.domain.FoodOption
+import com.github.eatzy.ui.navigation.Route
 import com.github.eatzy.ui.theme.DarkGreen
 import com.github.eatzy.ui.theme.EaTzyTheme
 
 data class BottomNavItem(
+    val route: Route,
     val label: String,
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector,
 )
 
 @Composable
-fun NavbarComponent(
+fun BottomNavigationBar(
+    items: List<BottomNavItem>,
+    selectedItemIndex: Int,
+    onItemSelected: (Int, Route) -> Unit,
     modifier: Modifier = Modifier,
-    onItemSelected: (Int) -> Unit = {}
 ) {
-    val items = listOf(
-        BottomNavItem(
-            label = "Home",
-            selectedIcon = Icons.Filled.Home,
-            unselectedIcon = Icons.Outlined.Home,
-        ),
-        BottomNavItem(
-            label = "Wallet",
-            selectedIcon = Icons.Filled.AccountBalanceWallet,
-            unselectedIcon = Icons.Outlined.AccountBalanceWallet,
-        ),
-        BottomNavItem(
-            label = "Stats",
-            selectedIcon = Icons.Filled.PieChart,
-            unselectedIcon = Icons.Outlined.PieChart,
-        ),
-        BottomNavItem(
-            label = "Profile",
-            selectedIcon = Icons.Filled.Person,
-            unselectedIcon = Icons.Outlined.Person,
-        ),
-    )
-
-    var selectedItemIndex by remember { mutableIntStateOf(0) }
     NavigationBar(
         modifier = modifier,
         containerColor = Color.White,
     ) {
-
         items.forEachIndexed { index, item ->
             NavigationBarItem(
                 selected = selectedItemIndex == index,
                 onClick = {
-                    selectedItemIndex = index
-                    onItemSelected(index)
+                    onItemSelected(index, item.route)
                 },
                 label = {
                     Text(
@@ -122,7 +99,7 @@ fun NavbarComponent(
                         } else {
                             item.unselectedIcon
                         },
-                        contentDescription = item.label,
+                        contentDescription = item.route.path,
                         tint = if (selectedItemIndex == index) Color.White else Color(0xFF66BB6A) // Darker Green for unselected
                     )
                 },
@@ -142,6 +119,32 @@ fun NavbarComponent(
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 private fun NavbarComponentPreview() {
+    val items = listOf(
+        BottomNavItem(
+            route = Route.HomeScreen,
+            label = "Home",
+            selectedIcon = Icons.Filled.Home,
+            unselectedIcon = Icons.Outlined.Home,
+        ),
+        BottomNavItem(
+            route = Route.FoodListScreen,
+            label = "Food",
+            selectedIcon = Icons.Filled.AccountBalanceWallet,
+            unselectedIcon = Icons.Outlined.AccountBalanceWallet,
+        ),
+        BottomNavItem(
+            route = Route.DistributionScreen,
+            label = "Distribution",
+            selectedIcon = Icons.Filled.PieChart,
+            unselectedIcon = Icons.Outlined.PieChart,
+        ),
+        BottomNavItem(
+            route = Route.ProfileScreen,
+            label = "Profile",
+            selectedIcon = Icons.Filled.Person,
+            unselectedIcon = Icons.Outlined.Person,
+        ),
+    )
     EaTzyTheme {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
@@ -150,7 +153,15 @@ private fun NavbarComponentPreview() {
                     .background(Color.LightGray)
                     .padding(bottom = 56.dp)
             ) {}
-            NavbarComponent(modifier = Modifier.align(Alignment.BottomCenter))
+            var selectedItemIndex by remember { mutableStateOf(0) }
+            BottomNavigationBar(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                items = items,
+                selectedItemIndex = selectedItemIndex,
+                onItemSelected = { index, _ ->
+                    selectedItemIndex = index
+                }
+            )
         }
     }
 }

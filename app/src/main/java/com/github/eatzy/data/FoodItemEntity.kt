@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import com.github.eatzy.domain.FoodItem
 import com.github.eatzy.domain.FoodUnit
 import java.util.Date
 
@@ -21,9 +22,10 @@ import java.util.Date
 )
 data class FoodItemEntity(
     @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "id")
     val id: Int = 0,
     @ColumnInfo(name = "business_id", index = true)
-    val businessId: String,
+    val businessId: Int,
     @ColumnInfo(name = "food_name")
     val foodName: String,
     @ColumnInfo(name = "food_type")
@@ -31,8 +33,20 @@ data class FoodItemEntity(
     @ColumnInfo(name = "expiration_date")
     val expirationDate: Date,
     @ColumnInfo(name = "initial_quantity")
-    val initialQuantity: Float,
+    val initialQuantity: Double,
     val unit: FoodUnit,
     @ColumnInfo(name = "input_date")
     val inputDate: Date = Date()
-)
+) {
+    fun toDomain(): FoodItem =
+        FoodItem(
+            id = this.id,
+            businessId = this.businessId,
+            foodName = this.foodName,
+            foodType = this.foodType,
+            expirationDate = this.expirationDate,
+            initialQuantity = this.initialQuantity,
+            unit = this.unit,
+            inputDate = this.inputDate
+        )
+}

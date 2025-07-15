@@ -285,8 +285,11 @@ fun ProfileHeader(name: String, phone: String, cornerRadius: Dp = 12.dp) {
             )
             Spacer(Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = name, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                Text(text = phone, fontSize = 14.sp, color = MaterialTheme.colorScheme.onPrimary)
+                Text(
+                    text = name, fontSize = 18.sp, fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+                Text(text = phone, fontSize = 14.sp, color = Color.Black)
             }
             IconButton(onClick = { /* TODO: Aksi untuk edit profil */ }) {
                 Icon(
@@ -420,8 +423,8 @@ fun BottleAddCardPreview() {
 
 @Composable
 fun DistributionInfoCard(
-    value: Int,
-    progress: Float,
+    value: Double,
+    progress: Double,
     foodName: String,
     typeText: String,
     modifier: Modifier = Modifier,
@@ -445,7 +448,7 @@ fun DistributionInfoCard(
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(
-                    progress = { progress },
+                    progress = { progress.toFloat() },
                     modifier = Modifier.fillMaxSize(),
                     color = if (status) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.error,
                     strokeWidth = 15.dp,
@@ -462,17 +465,20 @@ fun DistributionInfoCard(
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            Box {
-                Column(Modifier.align(Alignment.CenterStart)) {
+            Box(Modifier.fillMaxWidth()) {
+                Column(
+                    Modifier
+                        .align(Alignment.CenterStart)
+                ) {
                     Text(
-                        text = typeText,
+                        text = foodName,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp,
                         color = Color.DarkGray,
                         lineHeight = 20.sp
                     )
                     Text(
-                        text = foodName,
+                        text = typeText,
                         fontSize = 14.sp,
                         color = Color.Gray
                     )
@@ -500,8 +506,8 @@ fun DistributionInfoCard(
 fun DistributionInfoCardPreview() {
     EaTzyTheme {
         DistributionInfoCard(
-            value = 7550,
-            progress = 0.8f,
+            value = 7550.0,
+            progress = 0.9,
             foodName = "Nama Makanan",
             typeText = "Yang Tersedia Untuk Di Distribusikan"
         )
@@ -512,7 +518,7 @@ fun DistributionInfoCardPreview() {
 fun SimpleFoodCard(
     foodName: String,
     date: String,
-    size: Int,
+    size: Double,
     unit: String,
     type: FoodForm
 ) {
@@ -546,7 +552,7 @@ fun SimpleFoodCard(
                 )
             }
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
+                horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(5.dp)
             ) {
                 Text(
@@ -576,7 +582,7 @@ fun SimpleFoodCardPreview() {
             SimpleFoodCard(
                 foodName = "Rendang Sapi",
                 date = "12 December 2023",
-                size = 2,
+                size = 2.0,
                 unit = "kg",
                 type = FoodForm.SOLID
             )
@@ -584,7 +590,7 @@ fun SimpleFoodCardPreview() {
             SimpleFoodCard(
                 foodName = "Susu UHT",
                 date = "15 January 2024",
-                size = 1,
+                size = 1.2,
                 unit = "liter",
                 type = FoodForm.LIQUID
             )
@@ -743,29 +749,102 @@ fun NotificationCardPreview() {
 
 
 @Composable
-fun FoodInfoCard(modifier: Modifier = Modifier) {
+fun FoodInfoCard(
+    modifier: Modifier = Modifier,
+    progress: Double,
+    valueText: String,
+    foodName: String,
+    quantityDetails: String,
+    typeText: FoodForm,
+    expiryInfo: String,
+    isExpired: Boolean = false
+) {
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(
+        Row(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Nama makanan", color = Color.Gray)
-            Text("Jumlah", color = Color.Gray)
-            Text("Tanggal kadaluarsa", color = Color.Gray)
-            Text("Kondisi", color = Color.Gray)
+            Box(
+                modifier = Modifier.size(80.dp), // Ukuran disesuaikan
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    progress = { progress.toFloat() },
+                    modifier = Modifier.fillMaxSize(),
+                    color = if (isExpired) Color.Red else Color(0xFF8BC34A),
+                    strokeWidth = 8.dp,
+                    trackColor = Color(0xFFE0E0E0),
+                    strokeCap = StrokeCap.Round,
+                )
+                Text(
+                    text = valueText,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 22.sp,
+                    color = Color.DarkGray
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column {
+                Text(
+                    text = foodName,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.DarkGray,
+                    maxLines = 1,
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = quantityDetails,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
+                )
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = typeText.label,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_liquid),
+                        contentDescription = "Type Icon",
+                        tint = Color(0xFF9C27B0),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+
+                Text(
+                    text = expiryInfo,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (isExpired) Color.Red else Color.Gray,
+                    fontWeight = if (isExpired) FontWeight.Bold else FontWeight.Normal
+                )
+            }
         }
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-private fun FoodInfoCardPreview() {
-    EaTzyTheme {
-        FoodInfoCard()
-    }
+fun FoodInfoCardPreview() {
+    FoodInfoCard(
+        modifier = Modifier.padding(16.dp),
+        progress = 0.75,
+        valueText = "25",
+        foodName = "Yougurt",
+        quantityDetails = "25 botol",
+        typeText = FoodForm.LIQUID,
+        expiryInfo = "24 Des 2025 , expired",
+        isExpired = false
+    )
 }
