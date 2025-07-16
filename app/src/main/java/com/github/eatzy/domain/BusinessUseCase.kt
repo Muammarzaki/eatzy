@@ -18,4 +18,5 @@ interface BusinessUseCase {
     suspend fun findUserByName(username: String): User?
     suspend fun findWastedFoodById(id: Int): WastedFood?
     suspend fun findFoodItemById(id: Int): FoodItem?
+    fun getAllWastedByUnit(unit: FoodUnit): Flow<PagingData<WastedFood>>
 }

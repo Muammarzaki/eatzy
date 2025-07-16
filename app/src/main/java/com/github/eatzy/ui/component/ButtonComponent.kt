@@ -35,6 +35,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -54,6 +55,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.eatzy.R
+import com.github.eatzy.domain.FoodUnit
 import com.github.eatzy.ui.theme.Danger
 import com.github.eatzy.ui.theme.EaTzyTheme
 
@@ -228,13 +230,13 @@ private fun BigSwitchPreview() {
     }
 }
 
-enum class DeliveryOptions { DELIVERY, PICKUP, JAWA }
+enum class DeliveryOptions { DELIVERY, PICKUP }
 
 @Preview
 @Composable
 private fun BigSwitchPreviewDark() {
     EaTzyTheme(darkTheme = true) {
-        val options = DeliveryOptions.values().toList()
+        val options = DeliveryOptions.entries
         val (selectedOption, onOptionSelected) = remember { mutableStateOf(options[1]) }
         BigSwitch(
             options = options,
@@ -421,5 +423,54 @@ fun RegularButton(
 private fun RegularButtonPreview() {
     EaTzyTheme {
         RegularButton(onClick = {}, text = "Test Button")
+    }
+}
+
+@Composable
+fun <T : Enum<T>> EnumSelector(
+    options: Array<T>,
+    selectedOption: T,
+    onOptionSelected: (T) -> Unit,
+    labelProvider: (T) -> String,
+    modifier: Modifier = Modifier,
+    spaceBy: Dp = 8.dp
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(spaceBy)
+    ) {
+        options.forEach { option ->
+            val isSelected = option == selectedOption
+
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = if (isSelected) Color(0xFF4CAF50) else Color.White,
+                border = BorderStroke(1.dp, Color(0xFF4CAF50)),
+                onClick = { onOptionSelected(option) }
+            ) {
+                Text(
+                    text = labelProvider(option),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    color = if (isSelected) Color.White else Color(0xFF4CAF50),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+@Preview
+fun EnumSelectorPreview(modifier: Modifier = Modifier) {
+    EaTzyTheme {
+        var selected by remember { mutableStateOf(FoodUnit.KILOGRAM) }
+
+        EnumSelector(
+            options = FoodUnit.entries.toTypedArray(),
+            selectedOption = selected,
+            onOptionSelected = { selected = it },
+            labelProvider = { it.label }
+        )
     }
 }

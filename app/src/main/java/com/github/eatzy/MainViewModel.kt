@@ -12,6 +12,7 @@ import com.github.eatzy.data.DataRepository
 import com.github.eatzy.data.EatzyDatabase
 import com.github.eatzy.domain.FoodItem
 import com.github.eatzy.domain.FoodOption
+import com.github.eatzy.domain.FoodUnit
 import com.github.eatzy.domain.Recipient
 import com.github.eatzy.domain.UnreadableNotification
 import com.github.eatzy.domain.User
@@ -19,10 +20,15 @@ import com.github.eatzy.domain.WastedFood
 import com.github.eatzy.ui.screen.DistributionItem
 import com.github.eatzy.ui.screen.FoodItemCard
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class MainViewModel(private val repository: DataRepository) : ViewModel() {
@@ -106,7 +112,7 @@ class MainViewModel(private val repository: DataRepository) : ViewModel() {
 
     fun saveFoodItemStock(foodItem: FoodItem) {
         viewModelScope.launch(Dispatchers.IO) {
-            currentUser.value?.id?.let { repository.saveFoodStock(foodItem, it) }
+            currentUser.value?.business?.id?.let { repository.saveFoodStock(foodItem, it) }
         }
     }
 
@@ -140,6 +146,25 @@ class MainViewModel(private val repository: DataRepository) : ViewModel() {
                 }
             }
         }
+    }
+
+    private val _selectedUnit = MutableStateFlow(FoodUnit.KILOGRAM)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val wastedFoodsByUnit: StateFlow<PagingData<WastedFood>> =
+        _selectedUnit
+            .flatMapLatest { unit ->
+                repository.getAllWastedByUnit(unit)
+                    .cachedIn(viewModelScope)
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = PagingData.empty()
+            )
+
+    fun selectUnit(unit: FoodUnit) {
+        _selectedUnit.value = unit
     }
 
     companion object {

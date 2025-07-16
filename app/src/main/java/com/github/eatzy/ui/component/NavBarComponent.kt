@@ -169,6 +169,7 @@ private fun NavbarComponentPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopAppBarComponent(
+    showNotificationBadge: Boolean = false,
     title: String? = null,
     onBackClick: (() -> Unit)? = null,
     onNotificationClick: (() -> Unit)? = null
@@ -212,13 +213,14 @@ fun TopAppBarComponent(
             if (onNotificationClick != null) {
                 BadgedBox(
                     badge = {
-                        Badge(
-                            modifier = Modifier
-                                .offset((-5).dp, y = 3.dp)
-                                .size(15.dp),
-                            containerColor = DarkGreen,
-                            contentColor = Color.White
-                        )
+                        if (showNotificationBadge)
+                            Badge(
+                                modifier = Modifier
+                                    .offset((-5).dp, y = 3.dp)
+                                    .size(15.dp),
+                                containerColor = DarkGreen,
+                                contentColor = Color.White
+                            )
                     }
                 ) {
                     IconButtonCircle(
@@ -253,6 +255,7 @@ private fun TopAppBarComponentPreview() {
     EaTzyTheme {
         Column(Modifier.background(MaterialTheme.colorScheme.tertiaryContainer)) {
             TopAppBarComponent(
+                showNotificationBadge = true,
                 title = stringResource(R.string.food_wasted),
                 onBackClick = {},
                 onNotificationClick = {})

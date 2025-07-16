@@ -66,8 +66,8 @@ import java.util.Locale
 @Composable
 fun WeightIndicatorCard(
     modifier: Modifier = Modifier,
-    weight: Int = 70,
-    progress: Float = 0.85f,
+    weight: Float,
+    progress: Float ,
     bmiStatus: String = "You have a healthy BMI"
 ) {
     val cardBackgroundColor = Color(0xFFE6F8F0)
@@ -167,7 +167,10 @@ private fun WeightProgressIndicator(
 @Composable
 fun WeightIndicatorCardPreview() {
     Box(modifier = Modifier.padding(16.dp)) {
-        WeightIndicatorCard()
+        WeightIndicatorCard(
+            weight = 70f,
+            progress = 0.7f
+        )
     }
 }
 

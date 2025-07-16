@@ -8,6 +8,7 @@ import com.github.eatzy.domain.Business
 import com.github.eatzy.domain.BusinessUseCase
 import com.github.eatzy.domain.Distributed
 import com.github.eatzy.domain.FoodItem
+import com.github.eatzy.domain.FoodUnit
 import com.github.eatzy.domain.LeftoverStatus
 import com.github.eatzy.domain.Recipient
 import com.github.eatzy.domain.UnreadableNotification
@@ -40,6 +41,35 @@ class DataRepository(private val eatzyDao: EatzyDao) : BusinessUseCase {
                         condition = entity.wastedFood.condition,
                         form = entity.wastedFood.form,
                         status = entity.wastedFood.status
+                    )
+                }
+            }
+
+    }
+
+    override fun getAllWastedByUnit(unit: FoodUnit): Flow<PagingData<WastedFood>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 10,
+                enablePlaceholders = false,
+                initialLoadSize = 10
+            ),
+            pagingSourceFactory = { eatzyDao.getAllWastedFoodByUnit(unit) }
+        ).flow
+            .map { pagingData ->
+                pagingData.map { entity ->
+                    WastedFood(
+                        id = entity.wastedFood.id,
+                        foodItemId = entity.wastedFood.foodItemId,
+                        foodItem = entity.foodItem.foodName,
+                        leftoverInputDate = entity.wastedFood.leftoverInputDate,
+                        leftoverQuantity = entity.wastedFood.leftoverQuantity,
+                        unit = entity.wastedFood.unit,
+                        expirationDate = entity.wastedFood.expirationDate,
+                        condition = entity.wastedFood.condition,
+                        form = entity.wastedFood.form,
+                        status = entity.wastedFood.status,
+                        difference = (entity.wastedFood.leftoverQuantity / entity.foodItem.initialQuantity)
                     )
                 }
             }
@@ -158,40 +188,54 @@ class DataRepository(private val eatzyDao: EatzyDao) : BusinessUseCase {
     }
 
     override suspend fun saveFoodStock(foodItem: FoodItem, businessId: Int) {
-        eatzyDao.addFoodItem(
-            FoodItemEntity(
-                id = foodItem.id ?: 0,
-                foodName = foodItem.foodName,
-                initialQuantity = foodItem.initialQuantity,
-                unit = foodItem.unit,
-                expirationDate = foodItem.expirationDate,
-                businessId = businessId,
-                inputDate = Date(),
-                foodType = foodItem.foodType
+        val foodItemEntity = FoodItemEntity(
+            id = foodItem.id ?: -1,
+            foodName = foodItem.foodName,
+            initialQuantity = foodItem.initialQuantity,
+            unit = foodItem.unit,
+            expirationDate = foodItem.expirationDate,
+            businessId = businessId,
+            inputDate = Date(),
+            foodType = foodItem.foodType
+        )
+        if (foodItemEntity.id > 0) {
+            eatzyDao.updateFoodItem(
+                foodItemEntity
             )
+            return
+        }
+        eatzyDao.addFoodItem(
+            foodItemEntity
         )
     }
 
     override suspend fun saveWastedFood(wastedFood: WastedFood) {
-        eatzyDao.addWastedFood(
-            WastedFoodEntity(
-                id = wastedFood.id ?: 0,
-                foodItemId = wastedFood.foodItemId,
-                leftoverInputDate = wastedFood.leftoverInputDate ?: Date(),
-                leftoverQuantity = wastedFood.leftoverQuantity,
-                unit = wastedFood.unit,
-                expirationDate = wastedFood.expirationDate,
-                condition = wastedFood.condition,
-                form = wastedFood.form,
-                status = LeftoverStatus.AVAILABLE
+        val wastedFoodEntity = WastedFoodEntity(
+            id = wastedFood.id ?: -1,
+            foodItemId = wastedFood.foodItemId,
+            leftoverInputDate = wastedFood.leftoverInputDate ?: Date(),
+            leftoverQuantity = wastedFood.leftoverQuantity,
+            unit = wastedFood.unit,
+            expirationDate = wastedFood.expirationDate,
+            condition = wastedFood.condition,
+            form = wastedFood.form,
+            status = LeftoverStatus.AVAILABLE
+        )
+        if (wastedFoodEntity.id > 0) {
+            eatzyDao.updateWastedFood(
+                wastedFoodEntity
             )
+            return
+        }
+        eatzyDao.addWastedFood(
+            wastedFoodEntity
         )
     }
 
     override suspend fun saveUser(user: User): Int {
         return eatzyDao.addUser(
             UserEntity(
-                id = user.id ?: 0,
+                id = user.id ?: -1,
                 ownerName = user.name,
                 email = user.email,
                 phoneNumber = user.phoneNumber
@@ -202,10 +246,10 @@ class DataRepository(private val eatzyDao: EatzyDao) : BusinessUseCase {
     override suspend fun saveBusiness(business: Business) {
         eatzyDao.addBusiness(
             BusinessEntity(
-                id = business.id ?: 0,
+                id = business.id ?: -1,
                 businessName = business.businessName,
                 address = business.address,
-                userId = business.userId ?: 0
+                userId = business.userId ?: -1
             )
         )
     }

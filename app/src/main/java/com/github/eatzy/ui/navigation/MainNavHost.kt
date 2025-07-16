@@ -19,6 +19,7 @@ import com.github.eatzy.domain.Business
 import com.github.eatzy.domain.DistributionOption
 import com.github.eatzy.domain.FoodItem
 import com.github.eatzy.domain.FoodOption
+import com.github.eatzy.domain.FoodUnit
 import com.github.eatzy.domain.User
 import com.github.eatzy.domain.WastedFood
 import com.github.eatzy.ui.screen.DistributingScreen
@@ -78,8 +79,17 @@ fun MainNavHost(
             )
         }
         composable(Route.HomeScreen.path) {
+            var currentTag by remember { mutableStateOf(FoodUnit.KILOGRAM) }
+            val wastedFood = viewModel.wastedFoodsByUnit.collectAsLazyPagingItems()
+            LaunchedEffect(Unit) {
+                viewModel.selectUnit(FoodUnit.KILOGRAM)
+            }
             HomeScreen(
-                bottomBar = bottomBar
+                lazyItems = wastedFood,
+                bottomBar = bottomBar,
+                onTagSelected = {
+                    viewModel.selectUnit(it)
+                }
             )
         }
         composable(Route.FoodListScreen.path) {
@@ -170,11 +180,35 @@ fun MainNavHost(
                     onSubmitted = { foodStock, foodWasted ->
                         when (option) {
                             FoodOption.Stock -> foodStock?.let {
-                                viewModel.saveFoodItemStock(it)
+                                viewModel.saveFoodItemStock(
+                                    FoodItem(
+                                        id = initialFoodItem?.id,
+                                        foodName = it.foodName,
+                                        initialQuantity = it.initialQuantity,
+                                        unit = it.unit,
+                                        inputDate = it.inputDate,
+                                        expirationDate = it.expirationDate,
+                                        foodType = it.foodType
+                                    )
+                                )
                             }
 
                             FoodOption.Wasted -> foodWasted?.let {
-                                viewModel.saveWastedFood(it)
+
+                                viewModel.saveWastedFood(
+                                    WastedFood(
+                                        id = it.id ?: wastedFood?.id,
+                                        foodItemId = wastedFood?.foodItemId ?: it.foodItemId,
+                                        foodItem = it.foodItem,
+                                        leftoverInputDate = wastedFood?.leftoverInputDate,
+                                        leftoverQuantity = it.leftoverQuantity,
+                                        unit = it.unit,
+                                        expirationDate = it.expirationDate,
+                                        condition = it.condition,
+                                        form = it.form,
+                                        status = it.status
+                                    )
+                                )
                             }
                         }
                         navController.popBackStack()
@@ -207,7 +241,9 @@ fun MainNavHost(
             )
         }
         composable(Route.NotificationScreen.path) {
+            val unreadableNotifications = viewModel.unreadableNotifications
             NotificationScreen(
+                unreadableNotifications = unreadableNotifications.collectAsLazyPagingItems(),
                 onBackClick = {
                     navController.popBackStack()
                 }

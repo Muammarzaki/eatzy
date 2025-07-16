@@ -6,6 +6,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
+import com.github.eatzy.domain.FoodUnit
 import com.github.eatzy.domain.LeftoverStatus
 
 @Dao
@@ -35,6 +37,12 @@ interface EatzyDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun addFoodItem(foodItem: FoodItemEntity): Long
 
+    @Update
+    suspend fun updateFoodItem(foodItem: FoodItemEntity)
+
+    @Update
+    suspend fun updateWastedFood(wastedFood: WastedFoodEntity)
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun addDistribution(distribution: DistributionEntity): Long
 
@@ -61,4 +69,7 @@ interface EatzyDao {
 
     @Query("SELECT * FROM food_items WHERE id = :id")
     suspend fun getFoodItemById(id: Int): FoodItemEntity?
+
+    @Query("SELECT * FROM wasted_food where unit = :unit ORDER BY leftover_input_date DESC ")
+    fun getAllWastedFoodByUnit(unit: FoodUnit): PagingSource<Int, WastedWithFoodItems>
 }
