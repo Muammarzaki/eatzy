@@ -58,4 +58,7 @@ interface EatzyDao {
 
     @Query("SELECT * FROM wasted_food WHERE id = :id")
     suspend fun getWastedFoodById(id: Int): WastedWithFoodItems?
+
+    @Query("SELECT * FROM food_items WHERE id = :id")
+    suspend fun getFoodItemById(id: Int): FoodItemEntity?
 }

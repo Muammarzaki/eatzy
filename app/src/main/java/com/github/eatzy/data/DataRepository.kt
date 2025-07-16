@@ -246,4 +246,19 @@ class DataRepository(private val eatzyDao: EatzyDao) : BusinessUseCase {
             )
         }
     }
+
+    override suspend fun findFoodItemById(id: Int): FoodItem? {
+        return eatzyDao.getFoodItemById(id)?.let {
+            FoodItem(
+                id = it.id,
+                foodName = it.foodName,
+                initialQuantity = it.initialQuantity,
+                unit = it.unit,
+                expirationDate = it.expirationDate,
+                businessId = it.businessId,
+                inputDate = it.inputDate,
+                foodType = it.foodType
+            )
+        }
+    }
 }

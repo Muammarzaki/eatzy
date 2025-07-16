@@ -44,6 +44,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -648,7 +649,7 @@ fun WastedFoodInputForm(
     foodItems: LazyPagingItems<FoodItem> = flowOf(PagingData.empty<FoodItem>()).collectAsLazyPagingItems()
 ) {
     var foodName by remember { mutableStateOf(initialData?.foodItem ?: "") }
-    var foodItemId by remember { mutableStateOf(initialData?.foodItemId ?: 0) }
+    var foodItemId by remember { mutableIntStateOf(initialData?.foodItemId ?: 0) }
     val (selectedFoodForm, onFoodFormSelected) = remember { mutableStateOf(FoodForm.entries.first()) }
     var quantity by remember { mutableStateOf(initialData?.leftoverQuantity?.toString() ?: "") }
     var unit by remember { mutableStateOf(initialData?.unit ?: FoodUnit.KILOGRAM) }

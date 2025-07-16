@@ -17,4 +17,5 @@ interface BusinessUseCase {
     suspend fun saveBusiness(business: Business)
     suspend fun findUserByName(username: String): User?
     suspend fun findWastedFoodById(id: Int): WastedFood?
+    suspend fun findFoodItemById(id: Int): FoodItem?
 }

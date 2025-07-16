@@ -23,13 +23,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
 class MainViewModel(private val repository: DataRepository) : ViewModel() {
 
-    private val _businessId = MutableStateFlow<Int?>(null)
-    val businessId: StateFlow<Int?> = _businessId
+    private val _currentBusinessUser = MutableStateFlow<User?>(null)
+    val currentUser: StateFlow<User?> = _currentBusinessUser
 
     val wastedFoods: Flow<PagingData<FoodItemCard>> = repository.getAllWasted()
         .map { pagingData ->
@@ -39,7 +38,8 @@ class MainViewModel(private val repository: DataRepository) : ViewModel() {
                     date = foodItem.leftoverInputDate.toString(),
                     size = foodItem.leftoverQuantity,
                     unit = foodItem.unit.toString(),
-                    option = FoodOption.Wasted
+                    option = FoodOption.Wasted,
+                    id = foodItem.id ?: -1
                 )
             }
         }
@@ -53,7 +53,8 @@ class MainViewModel(private val repository: DataRepository) : ViewModel() {
                     date = foodItem.inputDate.toString(),
                     size = foodItem.initialQuantity,
                     unit = foodItem.unit.toString(),
-                    option = FoodOption.Stock
+                    option = FoodOption.Stock,
+                    id = foodItem.id ?: -1
                 )
             }
         }
@@ -99,13 +100,13 @@ class MainViewModel(private val repository: DataRepository) : ViewModel() {
         repository.getUnreadableNotification()
             .cachedIn(viewModelScope)
 
-    fun findWastedFoodById(id: Int): Flow<WastedFood?> = flow {
-        emit(repository.findWastedFoodById(id))
-    }
+    suspend fun findWastedFoodById(id: Int): WastedFood? = repository.findWastedFoodById(id)
+
+    suspend fun findFoodItemById(id: Int): FoodItem? = repository.findFoodItemById(id)
 
     fun saveFoodItemStock(foodItem: FoodItem) {
         viewModelScope.launch(Dispatchers.IO) {
-            businessId.value?.let { repository.saveFoodStock(foodItem, it) }
+            currentUser.value?.id?.let { repository.saveFoodStock(foodItem, it) }
         }
     }
 
@@ -118,13 +119,13 @@ class MainViewModel(private val repository: DataRepository) : ViewModel() {
     fun registerUser(user: User, onRegistrationComplete: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.saveUser(user)
-                .let {
+                .let { userId ->
                     repository.saveBusiness(
-                        user.business.copy(userId = it)
-                    ).let {
-                        viewModelScope.launch(Dispatchers.Main) {
-                            onRegistrationComplete()
-                        }
+                        user.business?.copy(userId = userId)
+                            ?: throw IllegalStateException("Business information is required for registration.")
+                    )
+                    viewModelScope.launch(Dispatchers.Main) {
+                        onRegistrationComplete()
                     }
                 }
         }
@@ -134,7 +135,7 @@ class MainViewModel(private val repository: DataRepository) : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             repository.findUserByName(email)?.let {
                 viewModelScope.launch(Dispatchers.Main) {
-                    _businessId.value = it.business.id
+                    _currentBusinessUser.value = it
                     onSuccessfulLogin()
                 }
             }

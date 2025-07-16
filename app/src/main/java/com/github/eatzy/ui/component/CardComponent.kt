@@ -520,10 +520,11 @@ fun SimpleFoodCard(
     date: String,
     size: Double,
     unit: String,
-    type: FoodForm
+    type: FoodForm,
+    modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(

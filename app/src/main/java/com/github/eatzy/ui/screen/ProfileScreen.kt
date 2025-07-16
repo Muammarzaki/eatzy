@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.github.eatzy.domain.User
 import com.github.eatzy.ui.component.HelpItem
 import com.github.eatzy.ui.component.LogoutButton
 import com.github.eatzy.ui.component.MenuListItem
@@ -33,7 +34,7 @@ import com.github.eatzy.ui.theme.EaTzyTheme
 
 
 @Composable
-fun ProfileScreen(bottomBar: @Composable () -> Unit = {}) {
+fun ProfileScreen(bottomBar: @Composable () -> Unit = {}, user: User) {
     Scaffold(
         bottomBar = bottomBar,
         containerColor = MaterialTheme.colorScheme.tertiaryContainer
@@ -46,7 +47,7 @@ fun ProfileScreen(bottomBar: @Composable () -> Unit = {}) {
                 .padding(16.dp)
         ) {
             Spacer(Modifier.height(24.dp))
-            ProfileHeader(name = "User (((((", phone = "+91 9996418776", cornerRadius = 16.dp)
+            ProfileHeader(name = user.name, phone = user.phoneNumber, cornerRadius = 16.dp)
             Spacer(Modifier.height(16.dp))
 
             Spacer(Modifier.height(24.dp))
@@ -118,6 +119,14 @@ fun HelpAndFeedbackSection() {
 @Composable
 fun DefaultPreview() {
     EaTzyTheme {
-        ProfileScreen()
+        ProfileScreen(
+            bottomBar = {},
+            user = User(
+                name = "John Doe",
+                phoneNumber = "+1234567890",
+                email = "helloworld@gmail.com",
+                business = null
+            )
+        )
     }
 }

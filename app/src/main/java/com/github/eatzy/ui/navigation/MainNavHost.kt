@@ -1,6 +1,9 @@
 package com.github.eatzy.ui.navigation
 
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -14,8 +17,10 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.github.eatzy.MainViewModel
 import com.github.eatzy.domain.Business
 import com.github.eatzy.domain.DistributionOption
+import com.github.eatzy.domain.FoodItem
 import com.github.eatzy.domain.FoodOption
 import com.github.eatzy.domain.User
+import com.github.eatzy.domain.WastedFood
 import com.github.eatzy.ui.screen.DistributingScreen
 import com.github.eatzy.ui.screen.FoodFormScreen
 import com.github.eatzy.ui.screen.HomeScreen
@@ -86,7 +91,7 @@ fun MainNavHost(
                 onNotificationClick = {
                     navController.navigate(Route.NotificationScreen.path)
                 },
-                onAddNewClick = {
+                onAddNewClicked = {
                     navController.navigate(Route.FormScreen.createRoute(it))
                 },
                 bottomBar = bottomBar,
@@ -94,7 +99,10 @@ fun MainNavHost(
                 onTabChange = {
                     tabState = it
                 },
-                lazyItems = lazyFood
+                lazyItems = lazyFood,
+                onCardClicked = { id ->
+                    navController.navigate(Route.FormScreen.createRoute(tabState, id))
+                }
             )
         }
         composable(Route.DistributionScreen.path) {
@@ -116,53 +124,83 @@ fun MainNavHost(
             )
         }
         composable(Route.ProfileScreen.path) {
+            val currentBusiness by viewModel.currentUser.collectAsState(null)
             ProfileScreen(
-                bottomBar = bottomBar
+                bottomBar = bottomBar,
+                user = currentBusiness ?: return@composable
             )
         }
         composable(
             Route.FormScreen.path,
-            arguments = Route.FormScreen.ARG
+            arguments = Route.FormScreen.ARGUMENTS
         ) { backStackEntry ->
-            val optionString = backStackEntry.arguments?.getString("option") ?: return@composable
-            val option = FoodOption.valueOf(optionString)
+            val optionArg = backStackEntry.arguments?.getString(Route.FormScreen.ARG_OPTION)
+                ?: return@composable
+            val foodIdArg = backStackEntry.arguments?.getInt(Route.FormScreen.ARG_FOOD_ID) ?: -1
 
-            FoodFormScreen(
-                onBackClicked = {
-                    navController.popBackStack()
-                },
-                option = option,
-                onSubmitted = { foodStock, foodWasted ->
-                    foodStock?.let {
-                        viewModel.saveFoodItemStock(foodStock).let {
-                            navController.popBackStack()
+            val option = FoodOption.valueOf(optionArg)
+            var wastedFood by remember { mutableStateOf<WastedFood?>(null) }
+            var initialFoodItem by remember { mutableStateOf<FoodItem?>(null) }
+
+            LaunchedEffect(foodIdArg) {
+                foodIdArg.let {
+                    when (option) {
+                        FoodOption.Wasted -> {
+                            wastedFood = viewModel.findWastedFoodById(it)
+                        }
+
+                        FoodOption.Stock -> {
+                            initialFoodItem = viewModel.findFoodItemById(it)
                         }
                     }
-                    foodWasted?.let {
-                        viewModel.saveWastedFood(foodWasted).let {
-                            navController.popBackStack()
+                }
+            }
+            if (option == FoodOption.Stock && foodIdArg > -1 && initialFoodItem == null) {
+                CircularProgressIndicator(modifier = Modifier.fillMaxSize())
+            } else if (option == FoodOption.Wasted && foodIdArg > -1 && wastedFood == null) {
+                CircularProgressIndicator(modifier = Modifier.fillMaxSize())
+            } else {
+                FoodFormScreen(
+                    initialFoodItem = initialFoodItem,
+                    initialWastedFood = wastedFood,
+                    onBackClicked = {
+                        navController.popBackStack()
+                    },
+                    option = option,
+                    onSubmitted = { foodStock, foodWasted ->
+                        when (option) {
+                            FoodOption.Stock -> foodStock?.let {
+                                viewModel.saveFoodItemStock(it)
+                            }
+
+                            FoodOption.Wasted -> foodWasted?.let {
+                                viewModel.saveWastedFood(it)
+                            }
                         }
-                    }
-                },
-                lazyFoodItem = viewModel.foodItems.collectAsLazyPagingItems()
-            )
+                        navController.popBackStack()
+                    },
+                    lazyFoodItem = viewModel.foodItems.collectAsLazyPagingItems()
+                )
+            }
         }
         composable(
             Route.DistributingScreen.path,
-            arguments = Route.DistributingScreen.ARG
+            arguments = Route.DistributingScreen.ARGUMENTS
         ) { backStackEntry ->
-            val distributionId =
-                backStackEntry.arguments?.getInt("distributionId") ?: return@composable
-            val distributionDetails by
-            viewModel.findWastedFoodById(distributionId).collectAsState(null)
+            val distributionIdArg =
+                backStackEntry.arguments?.getInt(Route.DistributingScreen.ARG_DISTRIBUTION_ID)
+                    ?: return@composable
+            var distributionDetails by remember { mutableStateOf<WastedFood?>(null) }
 
-            if (distributionDetails == null) return@composable
+            LaunchedEffect(distributionIdArg) {
+                distributionDetails = viewModel.findWastedFoodById(distributionIdArg)
+            }
 
             DistributingScreen(
                 onBackClicked = {
                     navController.popBackStack()
                 },
-                wastedFood = distributionDetails!!,
+                wastedFood = distributionDetails ?: return@composable,
                 onSubmitted = {
                     navController.popBackStack()
                 }

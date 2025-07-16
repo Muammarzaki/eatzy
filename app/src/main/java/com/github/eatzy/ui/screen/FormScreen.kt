@@ -12,19 +12,25 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.github.eatzy.domain.FoodCondition
+import com.github.eatzy.domain.FoodForm
 import com.github.eatzy.domain.FoodItem
 import com.github.eatzy.domain.FoodOption
+import com.github.eatzy.domain.FoodUnit
 import com.github.eatzy.domain.WastedFood
 import com.github.eatzy.ui.component.FoodInputForm
 import com.github.eatzy.ui.component.TopAppBarComponent
 import com.github.eatzy.ui.component.WastedFoodInputForm
 import com.github.eatzy.ui.theme.EaTzyTheme
 import kotlinx.coroutines.flow.flowOf
+import java.util.Calendar
 
 @Composable
 fun FoodFormScreen(
+    initialFoodItem: FoodItem? = null,
+    initialWastedFood: WastedFood? = null,
     onBackClicked: () -> Unit = {},
-    lazyFoodItem: LazyPagingItems<FoodItem> ,
+    lazyFoodItem: LazyPagingItems<FoodItem>,
     option: FoodOption,
     onSubmitted: (FoodItem?, WastedFood?) -> Unit = { _, _ -> }
 ) {
@@ -47,7 +53,8 @@ fun FoodFormScreen(
                 FoodInputForm(
                     onSubmitted = {
                         onSubmitted(it, null)
-                    }
+                    },
+                    initialData = initialFoodItem
                 )
             }
             if (option == FoodOption.Wasted) {
@@ -55,10 +62,54 @@ fun FoodFormScreen(
                     onSubmitted = {
                         onSubmitted(null, it)
                     },
+                    initialData = initialWastedFood,
                     foodItems = lazyFoodItem,
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun UpdateFoodFormScreenPreview() {
+    EaTzyTheme {
+        FoodFormScreen(
+            option = FoodOption.Stock,
+            lazyFoodItem = flowOf(PagingData.empty<FoodItem>()).collectAsLazyPagingItems(),
+            initialFoodItem = FoodItem(
+                id = 1,
+                foodName = "Nasi Goreng",
+                foodType = "Main Course",
+                expirationDate = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 5) }.time,
+                initialQuantity = 2.0,
+                unit = FoodUnit.PORTION
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun UpdateWastedFormScreenPreview() {
+    EaTzyTheme {
+        FoodFormScreen(
+            option = FoodOption.Wasted,
+            lazyFoodItem = flowOf(PagingData.empty<FoodItem>()).collectAsLazyPagingItems(),
+            initialWastedFood =  WastedFood(
+                foodItemId = 1,
+                leftoverQuantity = 2.0,
+                unit = FoodUnit.PORTION,
+                condition = FoodCondition.EDIBLE,
+                expirationDate = Calendar
+                    .getInstance()
+                    .apply {
+                        add(Calendar.DAY_OF_YEAR, 2)
+                    }.time,
+                form = FoodForm.SOLID,
+                foodItem = "Nasi Goreng"
+            )
+        )
     }
 }
 

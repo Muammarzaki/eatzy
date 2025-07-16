@@ -1,5 +1,6 @@
 package com.github.eatzy.ui.screen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.flowOf
 
 
 data class FoodItemCard(
+    val id: Int,
     val foodName: String,
     val date: String,
     val size: Double,
@@ -41,7 +43,8 @@ fun ListFoodScreen(
     lazyItems: LazyPagingItems<FoodItemCard>,
     tabState: FoodOption = FoodOption.Stock,
     onTabChange: (FoodOption) -> Unit = { },
-    onAddNewClick: (FoodOption) -> Unit,
+    onAddNewClicked: (FoodOption) -> Unit,
+    onCardClicked: (Int) -> Unit = {},
     onNotificationClick: () -> Unit,
     bottomBar: @Composable () -> Unit = {},
 ) {
@@ -52,7 +55,7 @@ fun ListFoodScreen(
         },
         floatingActionButton = {
             AddFab {
-                onAddNewClick(tabState)
+                onAddNewClicked(tabState)
             }
         },
         bottomBar = bottomBar
@@ -73,6 +76,9 @@ fun ListFoodScreen(
                     val item = lazyItems[index]
                     item?.let {
                         SimpleFoodCard(
+                            modifier = Modifier.clickable {
+                                onCardClicked(it.id)
+                            },
                             foodName = it.foodName,
                             date = it.date,
                             size = it.size,
@@ -93,8 +99,24 @@ private fun ListFoodScreenPreview() {
     val fakeItems = flowOf(
         PagingData.from(
             listOf(
-                FoodItemCard("Apple", "2023-10-27", 1.0, "piece", FoodForm.SOLID, FoodOption.Stock),
-                FoodItemCard("Milk", "2023-10-28", 1.0, "liter", FoodForm.LIQUID, FoodOption.Stock)
+                FoodItemCard(
+                    0,
+                    "Apple",
+                    "2023-10-27",
+                    1.0,
+                    "piece",
+                    FoodForm.SOLID,
+                    FoodOption.Stock
+                ),
+                FoodItemCard(
+                    1,
+                    "Milk",
+                    "2023-10-28",
+                    1.0,
+                    "liter",
+                    FoodForm.LIQUID,
+                    FoodOption.Stock
+                )
             )
         )
     )
@@ -103,7 +125,7 @@ private fun ListFoodScreenPreview() {
         ListFoodScreen(
             tabState = tabState,
             lazyItems = lazyPagingItems,
-            onAddNewClick = {},
+            onAddNewClicked = {},
             onNotificationClick = {},
             onTabChange = {
                 tabState = it
