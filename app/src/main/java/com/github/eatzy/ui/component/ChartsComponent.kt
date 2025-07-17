@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,8 +18,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -33,10 +37,23 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.yml.charts.axis.AxisData
+import co.yml.charts.common.model.Point
+import co.yml.charts.ui.linechart.LineChart
+import co.yml.charts.ui.linechart.model.GridLines
+import co.yml.charts.ui.linechart.model.IntersectionPoint
+import co.yml.charts.ui.linechart.model.Line
+import co.yml.charts.ui.linechart.model.LineChartData
+import co.yml.charts.ui.linechart.model.LinePlotData
+import co.yml.charts.ui.linechart.model.LineStyle
+import co.yml.charts.ui.linechart.model.SelectionHighlightPoint
+import co.yml.charts.ui.linechart.model.SelectionHighlightPopUp
+import co.yml.charts.ui.linechart.model.ShadowUnderLine
 
 @Composable
 fun SummaryPieChart(
@@ -219,7 +236,6 @@ fun ChartLegend(color: Color, text: String, value: String) {
 }
 
 
-
 @Preview(showBackground = true)
 @Composable
 fun CalorieTrackerChartPreview() {
@@ -230,3 +246,157 @@ fun CalorieTrackerChartPreview() {
     }
 }
 
+
+@Composable
+fun SalesRevenueChart(
+    salesData: List<Float>,
+    months: List<String>
+) {
+    val points = salesData.mapIndexed { index, value ->
+        Point(index.toFloat(), value)
+    }
+
+    val xAxisData = AxisData.Builder()
+        .axisStepSize(40.dp)
+        .backgroundColor(Color.Transparent)
+        .steps(points.size - 1)
+        .labelData { i -> months.getOrElse(i) { "" } }
+        .labelAndAxisLinePadding(15.dp)
+        .axisLabelFontSize(12.sp)
+        .axisLineColor(MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+        .build()
+
+    val maxSales = salesData.maxOrNull() ?: 0f
+    val yStepSize = maxSales / 4
+
+    val yAxisData = AxisData.Builder()
+        .steps(4)
+        .backgroundColor(Color.Transparent)
+        .labelAndAxisLinePadding(20.dp)
+        .labelData { i ->
+            val value = (i * yStepSize)
+            if (value >= 1000) "${value / 1000}K" else "${value.toInt()}"
+        }
+        .axisLabelFontSize(10.sp)
+        .axisLineColor(MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+        .build()
+
+    val lineChartData = LineChartData(
+        linePlotData = LinePlotData(
+            lines = listOf(
+                Line(
+                    dataPoints = points,
+                    lineStyle = LineStyle(
+                        color = MaterialTheme.colorScheme.primary,
+                        width = 3f
+                    ),
+                    intersectionPoint = IntersectionPoint(
+                        color = MaterialTheme.colorScheme.primary,
+                        radius = 4.dp
+                    ),
+                    selectionHighlightPoint = SelectionHighlightPoint(
+                        color = MaterialTheme.colorScheme.primary,
+                        radius = 6.dp
+                    ),
+                    shadowUnderLine = ShadowUnderLine(
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                    ),
+                    selectionHighlightPopUp = SelectionHighlightPopUp(
+                        popUpLabel = { x, y ->
+                            "${months[x.toInt()]}: $${
+                                y.toInt().toString().reversed().chunked(3).joinToString(",")
+                                    .reversed()
+                            }"
+                        }
+                    )
+                )
+            ),
+        ),
+        xAxisData = xAxisData,
+        yAxisData = yAxisData,
+        gridLines = GridLines(
+            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+            enableHorizontalLines = true,
+            enableVerticalLines = true
+        ),
+        backgroundColor = Color.Transparent
+    )
+
+    ChartCard(
+        title = "Wasted Food Amount Trend",
+        subtitle = "Monthly performance overview",
+        icon = Icons.AutoMirrored.Default.TrendingUp
+    ) {
+        LineChart(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(),
+            lineChartData = lineChartData,
+        )
+    }
+}
+
+@Composable
+fun ChartCard(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    content: @Composable () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            content()
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Sales Revenue Chart")
+@Composable
+fun SalesRevenueChartPreview() {
+    MaterialTheme {
+        Surface(
+            modifier = Modifier.aspectRatio(1f),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            val salesData = listOf(12f, 15f, 11f, 18f, 16f, 20f, 17f, 22f, 19f, 21f, 23f, 25f)
+            val months = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+            SalesRevenueChart(salesData = salesData, months = months)
+        }
+    }
+}
