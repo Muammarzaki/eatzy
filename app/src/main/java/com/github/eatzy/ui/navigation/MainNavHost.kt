@@ -79,7 +79,6 @@ fun MainNavHost(
             )
         }
         composable(Route.HomeScreen.path) {
-            var currentTag by remember { mutableStateOf(FoodUnit.KILOGRAM) }
             val wastedFood = viewModel.wastedFoodsByUnit.collectAsLazyPagingItems()
             val chartData = viewModel.chartData.collectAsState()
             LaunchedEffect(Unit) {

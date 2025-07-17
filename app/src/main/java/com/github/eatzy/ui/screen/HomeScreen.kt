@@ -25,7 +25,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.github.eatzy.domain.FoodUnit
 import com.github.eatzy.domain.FoodWasteChartData
 import com.github.eatzy.domain.WastedFood
-import com.github.eatzy.ui.component.CalorieTrackerChart
+import com.github.eatzy.ui.component.SummaryPieChart
 import com.github.eatzy.ui.component.ChipFilterDropdown
 import com.github.eatzy.ui.component.EnumSelector
 import com.github.eatzy.ui.component.WeightIndicatorCard
@@ -54,7 +54,7 @@ fun HomeScreen(
                 categoryItems = listOf("Today", "Tomorrow", "This Week", "This Month"),
                 onItemSelected = {}
             )
-            CalorieTrackerChart(
+            SummaryPieChart(
                 remaining = chartData?.remaining ?: 0f,
                 mitigated = chartData?.distributed ?: 0f,
                 lost = chartData?.wasted ?: 0f,
