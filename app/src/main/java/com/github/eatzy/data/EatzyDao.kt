@@ -8,6 +8,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.github.eatzy.domain.FoodUnit
+import com.github.eatzy.domain.FoodWasteChartData
 import com.github.eatzy.domain.LeftoverStatus
 
 @Dao
@@ -72,4 +73,22 @@ interface EatzyDao {
 
     @Query("SELECT * FROM wasted_food where unit = :unit ORDER BY leftover_input_date DESC ")
     fun getAllWastedFoodByUnit(unit: FoodUnit): PagingSource<Int, WastedWithFoodItems>
+
+    @Query("""SELECT
+      (SELECT SUM(wf.leftover_quantity)
+       FROM distributions d
+       JOIN wasted_food wf ON d.leftover_food_id = wf.id) AS distributed,
+    
+      (SELECT SUM(leftover_quantity)
+       FROM wasted_food
+       WHERE condition = 'DISPOSED') AS wasted,
+    
+      (SELECT SUM(leftover_quantity)
+       FROM wasted_food
+       WHERE status = 'AVAILABLE'
+         AND condition != 'DISPOSED'
+         AND id NOT IN (SELECT leftover_food_id FROM distributions)
+      ) AS remaining"""
+    )
+    suspend fun getFoodWasteChartData(): FoodWasteChartData
 }

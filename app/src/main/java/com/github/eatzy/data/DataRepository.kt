@@ -305,4 +305,7 @@ class DataRepository(private val eatzyDao: EatzyDao) : BusinessUseCase {
             )
         }
     }
+
+    suspend fun getFoodWasteChartData() = eatzyDao.getFoodWasteChartData()
+
 }

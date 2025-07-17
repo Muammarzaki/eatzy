@@ -13,6 +13,7 @@ import com.github.eatzy.data.EatzyDatabase
 import com.github.eatzy.domain.FoodItem
 import com.github.eatzy.domain.FoodOption
 import com.github.eatzy.domain.FoodUnit
+import com.github.eatzy.domain.FoodWasteChartData
 import com.github.eatzy.domain.Recipient
 import com.github.eatzy.domain.UnreadableNotification
 import com.github.eatzy.domain.User
@@ -167,6 +168,17 @@ class MainViewModel(private val repository: DataRepository) : ViewModel() {
         _selectedUnit.value = unit
     }
 
+    private val _chartData = MutableStateFlow<FoodWasteChartData?>(null)
+    val chartData: StateFlow<FoodWasteChartData?> = _chartData.asStateFlow()
+
+
+    private fun fetchChartData() {
+        viewModelScope.launch {
+            val data = repository.getFoodWasteChartData()
+            _chartData.value = data
+        }
+    }
+
     companion object {
         val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
@@ -181,5 +193,9 @@ class MainViewModel(private val repository: DataRepository) : ViewModel() {
                 ) as T
             }
         }
+    }
+
+    init {
+        fetchChartData()
     }
 }

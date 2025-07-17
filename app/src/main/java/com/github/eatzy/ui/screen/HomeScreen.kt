@@ -23,6 +23,7 @@ import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.github.eatzy.domain.FoodUnit
+import com.github.eatzy.domain.FoodWasteChartData
 import com.github.eatzy.domain.WastedFood
 import com.github.eatzy.ui.component.CalorieTrackerChart
 import com.github.eatzy.ui.component.ChipFilterDropdown
@@ -34,6 +35,7 @@ import kotlinx.coroutines.flow.flowOf
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    chartData: FoodWasteChartData? = null,
     lazyItems: LazyPagingItems<WastedFood>,
     bottomBar: @Composable () -> Unit = {},
     onTagSelected: (FoodUnit) -> Unit = {}
@@ -52,7 +54,12 @@ fun HomeScreen(
                 categoryItems = listOf("Today", "Tomorrow", "This Week", "This Month"),
                 onItemSelected = {}
             )
-            CalorieTrackerChart(modifier = Modifier.aspectRatio(1f))
+            CalorieTrackerChart(
+                remaining = chartData?.remaining ?: 0f,
+                mitigated = chartData?.distributed ?: 0f,
+                lost = chartData?.wasted ?: 0f,
+                modifier = Modifier.aspectRatio(1f)
+            )
             Spacer(Modifier.height(8.dp))
 
             EnumSelector(
@@ -68,8 +75,8 @@ fun HomeScreen(
                 contentPadding = PaddingValues(vertical = 5.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                items(lazyItems.itemCount) {
-                    lazyItems[it]?.let {
+                items(lazyItems.itemCount) { data ->
+                    lazyItems[data]?.let {
                         WeightIndicatorCard(
                             weight = it.leftoverQuantity.toFloat(),
                             progress = it.difference?.toFloat() ?: 0f,

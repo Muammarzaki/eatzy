@@ -45,20 +45,23 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun CalorieTrackerChart(
     modifier: Modifier = Modifier,
-    wasted: Float = 1500f,
-    mitigated: Float = 300f,
-    score: Float = 30f
+    remaining: Float = 1500f,
+    mitigated: Float = 3000f,
+    lost: Float = 30f
 ) {
-    val total = wasted + mitigated + score
-    val wastedPercentage = (wasted / total) * 100
+    val total = remaining + mitigated + lost
+    val lostPercentage = (lost / total) * 100
     val mitigatedPercentage = (mitigated / total) * 100
-    val scorePercentage = (score / total) * 100
-    val wastedSweepAngle = (wastedPercentage / 100) * 360f
+    val remainingPercentage = (remaining / total) * 100
+    val wastedSweepAngle = (lostPercentage / 100) * 360f
     val mitigatedSweepAngle = (mitigatedPercentage / 100) * 360f
-    val scoreSweepAngle = (scorePercentage / 100) * 360f
+    val remainingSweepAngle = (remainingPercentage / 100) * 360f
     val animatedWasted = remember { Animatable(0f) }
     val animatedMitigated = remember { Animatable(0f) }
     val animatedScore = remember { Animatable(0f) }
+
+    val score = if (total != 0f) (mitigated / total) * 100 else 0f
+
     LaunchedEffect(key1 = wastedSweepAngle) {
         animatedWasted.animateTo(
             targetValue = wastedSweepAngle,
@@ -71,12 +74,13 @@ fun CalorieTrackerChart(
             animationSpec = tween(durationMillis = 1000, delayMillis = 500)
         )
     }
-    LaunchedEffect(key1 = scoreSweepAngle) {
+    LaunchedEffect(key1 = remainingSweepAngle) {
         animatedScore.animateTo(
-            targetValue = scoreSweepAngle,
+            targetValue = remainingSweepAngle,
             animationSpec = tween(durationMillis = 1000, delayMillis = 1000)
         )
     }
+
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
@@ -85,10 +89,8 @@ fun CalorieTrackerChart(
         modifier = modifier
             .fillMaxWidth()
             .background(
-                brush = Brush.verticalGradient(
+                brush = Brush.radialGradient(
                     colors = listOf(MaterialTheme.colorScheme.primary, Color.White),
-                    startY = 0f,
-                    endY = 500f
                 )
             )
     ) {
@@ -96,35 +98,21 @@ fun CalorieTrackerChart(
             modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = "Macros", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                Card(
-                    shape = RoundedCornerShape(50),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
-                ) {
-                    Text(
-                        text = "Calories",
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(30.dp))
             Box(
                 contentAlignment = Alignment.Center,
-                modifier = Modifier.size(200.dp)
+                modifier = Modifier.size(220.dp)
             ) {
-                val baseStrokeWidth = 15f
+                val baseStrokeWidth = 25f
                 val ringSpacing = 30f
-                val gapAngle = 5f
-                Canvas(modifier = Modifier.size(200.dp)) {
+                val gapAngle = 7f
+
+                Canvas(modifier = Modifier.fillMaxSize()) {
+
                     val canvasSize = size.minDimension
                     val backgroundRingOffset = 0f
                     val backgroundRingSize = canvasSize - 2 * backgroundRingOffset - baseStrokeWidth
+
                     drawArc(
                         color = Color(0xFFE0E0E0),
                         startAngle = 0f,
@@ -137,68 +125,73 @@ fun CalorieTrackerChart(
                         ),
                         size = Size(backgroundRingSize, backgroundRingSize)
                     )
-                    val scoreRingOffset = backgroundRingOffset + ringSpacing * 2
-                    val scoreRingSize = canvasSize - 2 * scoreRingOffset - baseStrokeWidth
-                    val scoreStartAngle = -90f // Starts at the top
+
+                    val lv1Offset = backgroundRingOffset + ringSpacing * 2
+                    val lv1Size = canvasSize - 2 * lv1Offset - baseStrokeWidth
+                    val lv1Angle = -90f
+
+                    val lv2Offset = backgroundRingOffset + ringSpacing
+                    val lv2Size = canvasSize - 2 * lv2Offset - baseStrokeWidth
+                    val lv2Angle = lv1Angle + animatedScore.value + gapAngle
+
+                    val lv3Offset = backgroundRingOffset
+                    val lv3Size = canvasSize - 2 * lv3Offset - baseStrokeWidth
+                    val lv3Angle = lv2Angle + animatedMitigated.value + gapAngle
+
                     drawArc(
-                        color = Color(0xFFD32F2F), // Red for Score
-                        startAngle = scoreStartAngle,
+                        color = Color(0xFF1976D2),
+                        startAngle = lv3Angle,
                         sweepAngle = animatedScore.value,
                         useCenter = false,
                         style = Stroke(width = baseStrokeWidth, cap = StrokeCap.Round),
                         topLeft = Offset(
-                            scoreRingOffset + baseStrokeWidth / 2,
-                            scoreRingOffset + baseStrokeWidth / 2
+                            lv3Offset + baseStrokeWidth / 2,
+                            lv3Offset + baseStrokeWidth / 2
                         ),
-                        size = Size(scoreRingSize, scoreRingSize)
+                        size = Size(lv3Size, lv3Size)
                     )
-                    val mitigatedRingOffset =
-                        backgroundRingOffset + ringSpacing // One step inward from Score
-                    val mitigatedSize = canvasSize - 2 * mitigatedRingOffset - baseStrokeWidth
-                    val mitigatedStartAngle = scoreStartAngle + animatedScore.value + gapAngle
+
                     drawArc(
-                        color = Color(0xFFFFA000), // Orange
-                        startAngle = mitigatedStartAngle,
+                        color = Color(0xFFFFA000),
+                        startAngle = lv2Angle,
                         sweepAngle = animatedMitigated.value,
                         useCenter = false,
                         style = Stroke(width = baseStrokeWidth, cap = StrokeCap.Round),
                         topLeft = Offset(
-                            mitigatedRingOffset + baseStrokeWidth / 2,
-                            mitigatedRingOffset + baseStrokeWidth / 2
+                            lv2Offset + baseStrokeWidth / 2,
+                            lv2Offset + baseStrokeWidth / 2
                         ),
-                        size = Size(mitigatedSize, mitigatedSize)
+                        size = Size(lv2Size, lv2Size)
                     )
-                    val wastedRingOffset = backgroundRingOffset // Smallest offset for data rings
-                    val wastedRingSize = canvasSize - 2 * wastedRingOffset - baseStrokeWidth
-                    val wastedStartAngle = mitigatedStartAngle + animatedMitigated.value + gapAngle
+
                     drawArc(
-                        color = Color(0xFF1976D2), // Blue for Wasted
-                        startAngle = wastedStartAngle,
+                        color = Color(0xFFD32F2F),
+                        startAngle = lv1Angle,
                         sweepAngle = animatedWasted.value,
                         useCenter = false,
                         style = Stroke(width = baseStrokeWidth, cap = StrokeCap.Round),
                         topLeft = Offset(
-                            wastedRingOffset + baseStrokeWidth / 2,
-                            wastedRingOffset + baseStrokeWidth / 2
+                            lv1Offset + baseStrokeWidth / 2,
+                            lv1Offset + baseStrokeWidth / 2
                         ),
-                        size = Size(wastedRingSize, wastedRingSize)
+                        size = Size(lv1Size, lv1Size)
                     )
                 }
                 Text(
-                    text = wasted.toInt().toString(),
+                    text = String.format(java.util.Locale.getDefault(), "%.1f", score),
                     fontSize = 48.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(30.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
                 ChartLegend(
                     color = Color(0xFF1976D2),
-                    text = "Wasted",
-                    value = wasted.toInt().toString()
+                    text = "Remaining",
+                    value = remaining.toInt().toString()
                 )
                 ChartLegend(
                     color = Color(0xFFFFA000),
@@ -207,8 +200,8 @@ fun CalorieTrackerChart(
                 )
                 ChartLegend(
                     color = Color(0xFFD32F2F),
-                    text = "Score",
-                    value = score.toInt().toString()
+                    text = "Lost",
+                    value = lost.toInt().toString()
                 )
             }
         }
@@ -226,22 +219,6 @@ fun ChartLegend(color: Color, text: String, value: String) {
             Text(text = text, fontSize = 14.sp, color = Color.Gray)
             Text(text = value, fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
-    }
-}
-
-@Composable
-fun LegendItem(color: Color, label: String, value: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            modifier = Modifier
-                .size(10.dp)
-                .background(color, CircleShape)
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(text = label, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-        Text(
-            text = value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold
-        )
     }
 }
 
@@ -399,7 +376,6 @@ fun MonthlyTrendCard(modifier: Modifier = Modifier) {
         modifier = modifier.size(200.dp) // Maintain consistent size
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -419,7 +395,6 @@ fun MonthlyTrendCard(modifier: Modifier = Modifier) {
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            // Line Chart
             val path = Path()
             val animatedProgress =
                 animateFloatAsState(targetValue = 1f, animationSpec = tween(1500)).value
@@ -506,3 +481,99 @@ fun FoodProgressCardPreview() {
     }
 }
 
+
+@Composable
+fun FoodWasteChart(
+    distributed: Float,
+    discarded: Float,
+    available: Float
+) {
+    val total = distributed + discarded + available
+    val score = if (total != 0f) (distributed / total) * 100 else 0f
+
+    val sections = listOf(
+        PieSection(distributed, Color(0xFF4CAF50), "Distributed"), // Green
+        PieSection(discarded, Color(0xFFF44336), "Discarded"), // Red
+        PieSection(available, Color(0xFF2196F3), "Available") // Blue
+    )
+
+    Box(
+        modifier = Modifier
+            .size(220.dp)
+            .background(Color(0xFFE8F5E9), shape = RoundedCornerShape(16.dp))
+            .padding(16.dp)
+    ) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            var startAngle = -90f
+            sections.forEach { section ->
+                val sweep = (section.value / total) * 360f
+                drawArc(
+                    color = section.color,
+                    startAngle = startAngle,
+                    sweepAngle = sweep,
+                    useCenter = false,
+                    style = Stroke(width = 30f, cap = StrokeCap.Round),
+                    size = Size(size.width, size.height),
+                    topLeft = Offset(0f, 0f)
+                )
+                startAngle += sweep
+            }
+        }
+
+        // Center Score
+        Column(
+            modifier = Modifier
+                .align(Alignment.Center),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "${score.toInt()}%",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Managed",
+                fontSize = 14.sp,
+                color = Color.Gray
+            )
+        }
+
+        // Legend
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(top = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            sections.forEach {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .background(it.color, shape = CircleShape)
+                    )
+                    Text(text = "${it.label}: ${it.value.toInt()}")
+                }
+            }
+        }
+    }
+}
+
+data class PieSection(
+    val value: Float,
+    val color: Color,
+    val label: String
+)
+
+@Preview
+@Composable
+fun PreviewFoodWasteChart() {
+    FoodWasteChart(
+        distributed = 300f,
+        discarded = 200f,
+        available = 100f
+    )
+}
