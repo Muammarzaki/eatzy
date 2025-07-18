@@ -270,7 +270,7 @@ fun SalesRevenueChart(
     val yStepSize = maxSales / 4
 
     val yAxisData = AxisData.Builder()
-        .steps(4)
+        .steps(2)
         .backgroundColor(Color.Transparent)
         .labelAndAxisLinePadding(20.dp)
         .labelData { i ->
@@ -349,7 +349,6 @@ fun ChartCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
             modifier = Modifier

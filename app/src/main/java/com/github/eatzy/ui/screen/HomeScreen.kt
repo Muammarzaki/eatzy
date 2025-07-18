@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -25,9 +27,10 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.github.eatzy.domain.FoodUnit
 import com.github.eatzy.domain.FoodWasteChartData
 import com.github.eatzy.domain.WastedFood
-import com.github.eatzy.ui.component.SummaryPieChart
 import com.github.eatzy.ui.component.ChipFilterDropdown
 import com.github.eatzy.ui.component.EnumSelector
+import com.github.eatzy.ui.component.SalesRevenueChart
+import com.github.eatzy.ui.component.SummaryPieChart
 import com.github.eatzy.ui.component.WeightIndicatorCard
 import com.github.eatzy.ui.theme.EaTzyTheme
 import kotlinx.coroutines.flow.flowOf
@@ -41,6 +44,7 @@ fun HomeScreen(
     onTagSelected: (FoodUnit) -> Unit = {}
 ) {
     var selected by remember { mutableStateOf(FoodUnit.KILOGRAM) }
+    val pagerState = rememberPagerState(pageCount = { 2 })
     Scaffold(
         bottomBar = bottomBar
     ) { paddingValues ->
@@ -54,12 +58,30 @@ fun HomeScreen(
                 categoryItems = listOf("Today", "Tomorrow", "This Week", "This Month"),
                 onItemSelected = {}
             )
-            SummaryPieChart(
-                remaining = chartData?.remaining ?: 0f,
-                mitigated = chartData?.distributed ?: 0f,
-                lost = chartData?.wasted ?: 0f,
+            HorizontalPager(
+                state = pagerState,
                 modifier = Modifier.aspectRatio(1f)
-            )
+            ) { page ->
+                when (page) {
+                    0 -> {
+                        SummaryPieChart(
+                            remaining = chartData?.remaining ?: 0f,
+                            mitigated = chartData?.distributed ?: 0f,
+                            lost = chartData?.wasted ?: 0f,
+                        )
+                    }
+
+                    1 -> {
+                        val salesData =
+                            listOf(12f, 15f, 11f, 18f, 16f, 20f, 17f, 22f, 19f, 21f, 23f, 25f)
+                        val months = listOf(
+                            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+                        )
+                        SalesRevenueChart(salesData = salesData, months = months)
+                    }
+                }
+            }
             Spacer(Modifier.height(8.dp))
 
             EnumSelector(
