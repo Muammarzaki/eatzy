@@ -53,8 +53,8 @@ fun ListDistributionScreen(
                 onTabChange(it)
             }
             LazyColumn(
-                modifier = Modifier.padding(top = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                modifier = Modifier.padding(top = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(lazyItems.itemCount) { index ->
                     lazyItems[index]?.let {

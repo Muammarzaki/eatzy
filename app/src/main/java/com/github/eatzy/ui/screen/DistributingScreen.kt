@@ -92,7 +92,7 @@ fun DistributingScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             FoodInfoCard(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(5.dp),
                 progress = wastedFood.difference ?: 0.0,
                 valueText = wastedFood.leftoverQuantity.toString(),
                 foodName = wastedFood.foodItem,
@@ -135,6 +135,7 @@ fun DistributingScreen(
                     stringResource(R.string.notes_label),
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.surface,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 WhiteInputTextFieldWithBorder(
@@ -201,7 +202,7 @@ private fun DistributingScreenPreview() {
         foodItemId = 201,
         foodItem = "Special Fried Rice",
         leftoverInputDate = Date(System.currentTimeMillis() - 86_400_000), // yesterday
-        leftoverQuantity = 5.0,
+        leftoverQuantity = 50.1,
         unit = FoodUnit.PACK,
         expirationDate = Date(System.currentTimeMillis() + 2 * 86_400_000), // in 2 days
         condition = FoodCondition.DISPOSED,
