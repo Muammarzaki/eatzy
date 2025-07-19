@@ -267,7 +267,7 @@ fun <T : Enum<T>> Toggle(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp)
+            .height(50.dp)
             .clip(CircleShape)
             .background(Color(0xFF8BC34A).copy(alpha = 0.5f))
             .padding(6.dp)

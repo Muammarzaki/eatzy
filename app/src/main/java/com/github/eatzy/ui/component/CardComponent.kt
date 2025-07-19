@@ -58,6 +58,7 @@ import com.github.eatzy.R
 import com.github.eatzy.domain.FoodForm
 import com.github.eatzy.domain.FoodUnit
 import com.github.eatzy.ui.theme.EaTzyTheme
+import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -455,16 +456,17 @@ fun SimpleFoodCard(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(5.dp)
             ) {
+                val formatter = DecimalFormat("0.#").apply { maximumFractionDigits = 2 }
                 Text(
-                    text = "$size $unit",
+                    text = "${formatter.format(size)} $unit",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(end = 8.dp)
+                    modifier = Modifier.padding(end = 8.dp),
                 )
                 Icon(
                     painter = painterResource(id = if (type == FoodForm.SOLID) R.drawable.ic_solid else R.drawable.ic_liquid),
                     contentDescription = type.name,
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    tint = Color.Unspecified
                 )
             }
         }

@@ -73,7 +73,7 @@ fun ListFoodScreen(
             }
             LazyColumn(
                 modifier = Modifier.padding(top = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(lazyItems.itemCount) { index ->
                     val item = lazyItems[index]
