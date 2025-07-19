@@ -2,7 +2,6 @@ package com.github.eatzy.data
 
 import androidx.room.Embedded
 import androidx.room.Relation
-import com.github.eatzy.domain.WastedFood
 
 data class WastedWithFoodItems(
     @Embedded val wastedFood: WastedFoodEntity,

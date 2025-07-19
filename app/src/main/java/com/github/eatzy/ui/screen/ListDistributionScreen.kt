@@ -78,8 +78,8 @@ private fun ListFoodScreenPreview() {
     val fakeItems = flowOf(
         PagingData.from(
             listOf(
-                DistributionItem(0,7550.0, 0.8, "Apple Pie", "Yang Tersedia Untuk Di Distribusikan"),
-                DistributionItem(1,5000.0, 0.5, "Susu Kotak", "Yang Tersedia Untuk Di Distribusikan")
+                DistributionItem(0,7550.0, 0.8, "Apple Pie", "Available For Distribution"),
+                DistributionItem(1,5000.0, 0.5, "Box of Milk", "Available For Distribution")
             )
         )
     ).collectAsLazyPagingItems()

@@ -48,7 +48,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -60,11 +62,11 @@ import com.github.eatzy.ui.theme.Danger
 import com.github.eatzy.ui.theme.EaTzyTheme
 
 @Composable
-fun LogoutButton() {
+fun LogoutButton(onLogout: () -> Unit = {}) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { /* TODO: Aksi logout */ },
+            .clickable { onLogout() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -151,7 +153,7 @@ fun MembershipStatusBanner(bottomCorner: Dp = 0.dp) {
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "EATHLY PLUS MEMBER",
+                text = stringResource(R.string.eathly_plus_member),
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp
@@ -173,12 +175,11 @@ fun <T : Enum<T>> BigSwitch(
     options: List<T>,
     selectedOption: T,
     onOptionSelected: (T) -> Unit,
-    optionToString: (T) -> String = { it.name },
     backgroundColor: Color = Color.White,
     contentColor: Color = Color.Black,
     selectedColor: Color = backgroundColor,
-
-    ) {
+    labelProvider: (T) -> String = { it.name }
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
@@ -203,7 +204,7 @@ fun <T : Enum<T>> BigSwitch(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = optionToString(option),
+                        text = labelProvider(option),
                         color = if (isSelected) selectedColor else contentColor,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
@@ -278,9 +279,9 @@ fun ChipFilterDropdown(
                 )
             }
         )
-
         DropdownMenu(
             expanded = isMenuExpanded,
+            modifier = Modifier.background(MaterialTheme.colorScheme.surface),
             onDismissRequest = { isMenuExpanded = false }
         ) {
             categoryItems.forEach { item ->
@@ -304,7 +305,7 @@ private fun ChipFilterDropdownPreview() {
     EaTzyTheme {
         Column(
             modifier = Modifier
-                .padding(16.dp),
+                .padding(5.dp),
             verticalArrangement = Arrangement.Center
         ) {
             ChipFilterDropdown(
@@ -462,15 +463,15 @@ fun <T : Enum<T>> EnumSelector(
 
 @Composable
 @Preview
-fun EnumSelectorPreview(modifier: Modifier = Modifier) {
+fun EnumSelectorPreview() {
     EaTzyTheme {
         var selected by remember { mutableStateOf(FoodUnit.KILOGRAM) }
-
+        val context = LocalContext.current
         EnumSelector(
             options = FoodUnit.entries.toTypedArray(),
             selectedOption = selected,
             onOptionSelected = { selected = it },
-            labelProvider = { it.label }
+            labelProvider = { it.getLabel(context) }
         )
     }
 }

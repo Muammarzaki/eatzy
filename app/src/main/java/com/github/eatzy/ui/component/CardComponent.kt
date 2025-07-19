@@ -2,7 +2,6 @@ package com.github.eatzy.ui.component
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,13 +17,11 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LineWeight
 import androidx.compose.material.icons.filled.LocationOn
@@ -43,15 +40,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -59,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.eatzy.R
 import com.github.eatzy.domain.FoodForm
+import com.github.eatzy.domain.FoodUnit
 import com.github.eatzy.ui.theme.EaTzyTheme
 import java.text.NumberFormat
 import java.util.Locale
@@ -67,9 +65,11 @@ import java.util.Locale
 fun WeightIndicatorCard(
     modifier: Modifier = Modifier,
     weight: Float,
-    progress: Float ,
-    bmiStatus: String = "You have a healthy BMI"
+    progress: Float,
+    unit: FoodUnit,
+    foodStatus: String = "You have a healthy BMI"
 ) {
+    val context = LocalContext.current
     val cardBackgroundColor = Color(0xFFE6F8F0)
     val primaryColor = Color(0xFF0D63F3)
     val trackColor = Color(0xFFE0E0E0)
@@ -96,14 +96,14 @@ fun WeightIndicatorCard(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "$weight kg",
+                    text = "$weight ${unit.getLabel(context)}",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = textColorPrimary
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = bmiStatus,
+                    text = foodStatus,
                     fontSize = 14.sp,
                     color = textColorSecondary
                 )
@@ -169,7 +169,8 @@ fun WeightIndicatorCardPreview() {
     Box(modifier = Modifier.padding(16.dp)) {
         WeightIndicatorCard(
             weight = 70f,
-            progress = 0.7f
+            progress = 0.7f,
+            unit = FoodUnit.KILOGRAM
         )
     }
 }
@@ -270,7 +271,12 @@ private fun HelpItemPreview() {
 }
 
 @Composable
-fun ProfileHeader(name: String, phone: String, cornerRadius: Dp = 12.dp) {
+fun ProfileHeader(
+    name: String,
+    phone: String,
+    cornerRadius: Dp = 12.dp,
+    onEditProfileClicked: () -> Unit = {}
+) {
     Column {
         Row(
             modifier = Modifier
@@ -294,7 +300,7 @@ fun ProfileHeader(name: String, phone: String, cornerRadius: Dp = 12.dp) {
                 )
                 Text(text = phone, fontSize = 14.sp, color = Color.Black)
             }
-            IconButton(onClick = { /* TODO: Aksi untuk edit profil */ }) {
+            IconButton(onClick = onEditProfileClicked) {
                 Icon(
                     imageVector = Icons.Default.Edit,
                     contentDescription = "Edit Profile",
@@ -310,118 +316,8 @@ fun ProfileHeader(name: String, phone: String, cornerRadius: Dp = 12.dp) {
 @Composable
 private fun ProfileHeaderPreview() {
     EaTzyTheme {
-        ProfileHeader(name = "User (((((", phone = "+91 9996418776")
+        ProfileHeader(name = "John Doe", phone = "+1 123 456 7890")
     }
-}
-
-@Composable
-fun LivestockFeedCard() {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(modifier = Modifier.size(48.dp), contentAlignment = Alignment.Center) {
-                Image(
-                    painter = painterResource(R.drawable.ic_bottle_half),
-                    contentDescription = "Livestock Feed Icon",
-                    modifier = Modifier.scale(3f)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column {
-                Text(
-                    text = "Livestock Feed",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    color = Color.DarkGray
-                )
-                Text(
-                    text = "Stock",
-                    fontSize = 14.sp,
-                    color = Color.Gray
-                )
-            }
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun LivestockFeedCardPreview() {
-    LivestockFeedCard()
-}
-
-@Composable
-fun BottleAddCard(modifier: Modifier = Modifier, text: String) {
-    Card(
-        modifier = modifier.size(200.dp),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        )
-    ) {
-        Box(
-            modifier = Modifier
-                .padding(12.dp)
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-
-            Image(
-                painter = painterResource(id = R.drawable.ic_bottle_half),
-                contentDescription = "Bottle Icon",
-                modifier = Modifier
-                    .fillMaxSize()
-                    .align(Alignment.Center)
-                    .scale(0.8f)
-            )
-
-            IconButton(
-                onClick = { },
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .align(Alignment.TopEnd)
-                    .background(Color(0xFF007BFF))
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = text,
-                    tint = Color.White,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(50.dp))
-
-            Text(
-                text = text,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.DarkGray,
-                modifier = Modifier.align(Alignment.BottomCenter)
-            )
-        }
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun BottleAddCardPreview() {
-    BottleAddCard(text = "Tambah Makanan")
 }
 
 @Composable
@@ -511,8 +407,8 @@ fun DistributionInfoCardPreview() {
         DistributionInfoCard(
             value = 7550.0,
             progress = 0.9,
-            foodName = "Nama Makanan",
-            typeText = "Yang Tersedia Untuk Di Distribusikan"
+            foodName = "Sample Food",
+            typeText = "Available for Distribution"
         )
     }
 }
@@ -584,18 +480,18 @@ fun SimpleFoodCardPreview() {
                 .padding(16.dp)
         ) {
             SimpleFoodCard(
-                foodName = "Rendang Sapi",
+                foodName = "Beef Rendang",
                 date = "12 December 2023",
                 size = 2.0,
-                unit = "kg",
+                unit = FoodUnit.KILOGRAM.getLabel(LocalContext.current),
                 type = FoodForm.SOLID
             )
             Spacer(modifier = Modifier.height(8.dp)) // Spacer for multiple cards in preview
             SimpleFoodCard(
-                foodName = "Susu UHT",
+                foodName = "UHT Milk",
                 date = "15 January 2024",
                 size = 1.2,
-                unit = "liter",
+                unit = FoodUnit.LITER.getLabel(LocalContext.current),
                 type = FoodForm.LIQUID
             )
         }
@@ -668,7 +564,7 @@ fun DestinationDistributionCard(
                         )
                     }
                     Text(
-                        overflow = TextOverflow.Ellipsis,
+                        overflow = Ellipsis,
                         maxLines = 3, text = annotatedString,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -686,7 +582,7 @@ private fun DestinationDistributionCardPreview() {
         DestinationDistributionCard(
             name = "Destination Name",
             address = "Address",
-            description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. This is an extended description to make it longer than a single sentence, fulfilling the requirement.",
+            description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do usermod temper incident ut labor et do lore magna aliquot. This is an extended description to make it longer than a single sentence, fulfilling the requirement.",
             onLockStatusChange = {}
         )
     }
@@ -729,7 +625,7 @@ fun SimpleNotificationCard(subject: String, message: String, modifier: Modifier 
             Column {
                 Icon(
                     painter = painterResource(R.drawable.arrow_green_check),
-                    contentDescription = "Status Terkonfirmasi",
+                    contentDescription = stringResource(R.string.status_confirm),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(34.dp)
 
@@ -745,8 +641,8 @@ fun NotificationCardPreview() {
     EaTzyTheme {
         SimpleNotificationCard(
             modifier = Modifier.padding(16.dp),
-            subject = "Panti asuhan bersedia menerima makanan teralokasikan",
-            message = "Note jenis, Nasi Goreng. Ini adalah contoh pesan yang lebih panjang. Semoga bisa membantu Anda. Terima kasih atas perhatiannya."
+            subject = "Orphanage is willing to accept allocated food",
+            message = "Note type, Fried Rice. This is an example of a longer message. Hope it can help you. Thank you for your attention."
         )
     }
 }
@@ -763,6 +659,7 @@ fun FoodInfoCard(
     expiryInfo: String,
     isExpired: Boolean = false
 ) {
+    val context = LocalContext.current
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -774,7 +671,7 @@ fun FoodInfoCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
-                modifier = Modifier.size(80.dp), // Ukuran disesuaikan
+                modifier = Modifier.size(80.dp),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(
@@ -814,7 +711,7 @@ fun FoodInfoCard(
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = typeText.label,
+                        text = typeText.getLabel(context),
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.Gray
                     )
@@ -845,10 +742,10 @@ fun FoodInfoCardPreview() {
         modifier = Modifier.padding(16.dp),
         progress = 0.75,
         valueText = "25",
-        foodName = "Yougurt",
-        quantityDetails = "25 botol",
+        foodName = "Yogurt",
+        quantityDetails = "25 bottles",
         typeText = FoodForm.LIQUID,
-        expiryInfo = "24 Des 2025 , expired",
+        expiryInfo = "24 Dec 2025 , expired",
         isExpired = false
     )
 }

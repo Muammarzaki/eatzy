@@ -1,5 +1,6 @@
 package com.github.eatzy.ui.screen
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,10 +25,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.paging.PagingData
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.github.eatzy.R
 import com.github.eatzy.domain.FoodCondition
 import com.github.eatzy.domain.FoodForm
 import com.github.eatzy.domain.FoodUnit
@@ -40,7 +46,10 @@ import com.github.eatzy.ui.component.FoodInfoCard
 import com.github.eatzy.ui.component.TopAppBarComponent
 import com.github.eatzy.ui.component.WhiteInputTextFieldWithBorder
 import com.github.eatzy.ui.theme.EaTzyTheme
+import kotlinx.coroutines.flow.flowOf
+import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 data class DistributingFormData(
     val wastedFoofId: Int,
@@ -48,21 +57,19 @@ data class DistributingFormData(
     val notes: String
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun DistributingScreen(
     wastedFood: WastedFood,
-    recipient: List<Recipient> = emptyList(),
-    onBackClicked: (() -> Unit) = {},
+    recipient: LazyPagingItems<Recipient>,
+    onBackClicked: () -> Unit = {},
     onSubmitted: (DistributingFormData) -> Unit
 ) {
+    val dateFormatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
     var note by remember { mutableStateOf("") }
     var lockeStatus by remember { mutableStateOf(false) }
     var lockedId by remember { mutableIntStateOf(0) }
-    val pagerState = rememberPagerState(
-        initialPage = Int.MAX_VALUE / 2,
-        pageCount = { Int.MAX_VALUE }
-    )
+    val pagerState = rememberPagerState { recipient.itemCount }
 
     val isExpired = wastedFood.expirationDate.before(Date())
 
@@ -70,7 +77,7 @@ fun DistributingScreen(
         containerColor = MaterialTheme.colorScheme.tertiaryContainer,
         topBar = {
             TopAppBarComponent(
-                title = "Distributing",
+                title = stringResource(R.string.distributing_title),
                 onBackClick = onBackClicked
             )
         }
@@ -91,29 +98,32 @@ fun DistributingScreen(
                 foodName = wastedFood.foodItem,
                 quantityDetails = "${wastedFood.leftoverQuantity} ${wastedFood.unit}",
                 typeText = wastedFood.form,
-                expiryInfo = "${wastedFood.expirationDate}${if (isExpired) ", expired" else ""}",
+                expiryInfo = "${dateFormatter.format(wastedFood.expirationDate)}${if (isExpired) ", expired" else ""}",
                 isExpired = isExpired
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            if (recipient.isNotEmpty()) {
-                HorizontalPager(state = pagerState) { virtualPage ->
-                    val realPageIndex = (virtualPage - (Int.MAX_VALUE / 2)).mod(recipient.size)
-                    val item = recipient[realPageIndex]
-                    DestinationDistributionCard(
-                        name = item.recipientName,
-                        address = item.address,
-                        description = item.description,
-                        onLockStatusChange = {
-                            lockeStatus = !lockeStatus
-                            lockedId = item.id
-                        }
-                    )
+            if (recipient.itemCount > 0) {
+                HorizontalPager(
+                    state = pagerState,
+                    pageSpacing = 16.dp
+                ) { index ->
+                    recipient[index]?.let { item ->
+                        DestinationDistributionCard(
+                            name = item.recipientName,
+                            address = item.address,
+                            description = item.description,
+                            onLockStatusChange = {
+                                lockeStatus = !lockeStatus
+                                lockedId = item.id
+                            }
+                        )
+                    }
                 }
             } else {
                 Text(
-                    text = "Tidak ada penerima yang tersedia",
+                    text = stringResource(R.string.no_one_recipients),
                     style = MaterialTheme.typography.bodyLarge
                 )
             }
@@ -122,7 +132,7 @@ fun DistributingScreen(
 
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    "Catatan",
+                    stringResource(R.string.notes_label),
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -130,7 +140,7 @@ fun DistributingScreen(
                 WhiteInputTextFieldWithBorder(
                     value = note,
                     onValueChange = { note = it },
-                    placeholder = "Masukkan catatan",
+                    placeholder = stringResource(R.string.notes_placeholder),
                 )
             }
 
@@ -151,7 +161,7 @@ fun DistributingScreen(
                     .padding(vertical = 16.dp)
                     .height(50.dp),
                 shape = RoundedCornerShape(16.dp),
-                enabled = lockeStatus && recipient.isNotEmpty(),
+                enabled = lockeStatus && recipient.itemCount > 0,
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onTertiaryContainer)
             ) {
                 Text("Submit", fontSize = 16.sp, color = Color.DarkGray)
@@ -162,62 +172,48 @@ fun DistributingScreen(
 
 @Preview(showBackground = true, device = "id:pixel_6")
 @Composable
-fun DistributingScreenEmptyRecipientPreview() {
+private fun DistributingScreenPreview() {
+    val fakeRecipients = flowOf(
+        PagingData.from(
+            listOf(
+                Recipient(
+                    id = 1,
+                    recipientName = "Community Center",
+                    address = "123 Main Street",
+                    contact = "081234567891",
+                    description = "Provides food for local families.",
+                    type = RecipientType.SOCIAL
+                ),
+                Recipient(
+                    id = 2,
+                    recipientName = "Animal Shelter",
+                    address = "456 Pet Road",
+                    contact = "081234567892",
+                    description = "Accepts leftover food for animals.",
+                    type = RecipientType.LIVESTOCK_COMPOST
+                )
+            )
+        )
+    ).collectAsLazyPagingItems()
+
+    val dummyWastedFood = WastedFood(
+        id = 101,
+        foodItemId = 201,
+        foodItem = "Special Fried Rice",
+        leftoverInputDate = Date(System.currentTimeMillis() - 86_400_000), // yesterday
+        leftoverQuantity = 5.0,
+        unit = FoodUnit.PACK,
+        expirationDate = Date(System.currentTimeMillis() + 2 * 86_400_000), // in 2 days
+        condition = FoodCondition.DISPOSED,
+        form = FoodForm.SOLID,
+        status = LeftoverStatus.AVAILABLE,
+        difference = 0.5
+    )
+
     EaTzyTheme {
         DistributingScreen(
-            recipient = emptyList(),
-            wastedFood = WastedFood(
-                id = 101,
-                foodItemId = 201,
-                foodItem = "Nasi Goreng Spesial",
-                leftoverInputDate = Date(System.currentTimeMillis() - 86400000),
-                leftoverQuantity = 5.0,
-                unit = FoodUnit.PACK,
-                expirationDate = Date(System.currentTimeMillis() + 86400000 * 2),
-                condition = FoodCondition.DISPOSED,
-                form = FoodForm.SOLID,
-                status = LeftoverStatus.AVAILABLE,
-                difference = 0.5
-            ),
-            onSubmitted = {}
-        )
-    }
-}
-
-
-@Preview(showBackground = true, device = "id:pixel_6")
-@Composable
-fun DistributingScreenPreview() {
-    val dummyRecipients = (1..5).map {
-        Recipient(
-            id = it,
-            recipientName = "Penerima $it",
-            address = "Alamat Penerima $it",
-            contact = "08123456789$it",
-            description = when (it) {
-                1 -> "Deskripsi untuk penerima 1 yang cukup panjang."
-                3 -> "Deskripsi untuk penerima 3. Ini adalah deskripsi yang lebih panjang untuk memastikan tampilannya benar."
-                else -> "Deskripsi untuk penerima $it."
-            },
-            type = if (it % 2 == 0) RecipientType.LIVESTOCK_COMPOST else RecipientType.SOCIAL
-        )
-    }
-    EaTzyTheme {
-        DistributingScreen(
-            recipient = dummyRecipients,
-            wastedFood = WastedFood(
-                id = 101,
-                foodItemId = 201,
-                foodItem = "Nasi Goreng Spesial",
-                leftoverInputDate = Date(System.currentTimeMillis() - 86400000),
-                leftoverQuantity = 5.0,
-                unit = FoodUnit.PACK,
-                expirationDate = Date(System.currentTimeMillis() + 86400000 * 2),
-                condition = FoodCondition.DISPOSED,
-                form = FoodForm.SOLID,
-                status = LeftoverStatus.AVAILABLE,
-                difference = 0.5
-            ),
+            recipient = fakeRecipients,
+            wastedFood = dummyWastedFood,
             onSubmitted = {}
         )
     }

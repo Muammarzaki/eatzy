@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.paging.PagingData
@@ -20,6 +21,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.github.eatzy.domain.FoodForm
 import com.github.eatzy.domain.FoodOption
+import com.github.eatzy.domain.FoodUnit
 import com.github.eatzy.ui.component.AddFab
 import com.github.eatzy.ui.component.FoodToggle
 import com.github.eatzy.ui.component.SimpleFoodCard
@@ -33,7 +35,7 @@ data class FoodItemCard(
     val foodName: String,
     val date: String,
     val size: Double,
-    val unit: String,
+    val unit: FoodUnit,
     val type: FoodForm = FoodForm.SOLID,
     val option: FoodOption
 )
@@ -41,13 +43,14 @@ data class FoodItemCard(
 @Composable
 fun ListFoodScreen(
     lazyItems: LazyPagingItems<FoodItemCard>,
-    tabState: FoodOption = FoodOption.Stock,
+    tabState: FoodOption = FoodOption.STOCK,
     onTabChange: (FoodOption) -> Unit = { },
     onAddNewClicked: (FoodOption) -> Unit,
     onCardClicked: (Int) -> Unit = {},
     onNotificationClick: () -> Unit,
     bottomBar: @Composable () -> Unit = {},
 ) {
+    val context = LocalContext.current
     Scaffold(
         containerColor = MaterialTheme.colorScheme.tertiaryContainer,
         topBar = {
@@ -82,7 +85,7 @@ fun ListFoodScreen(
                             foodName = it.foodName,
                             date = it.date,
                             size = it.size,
-                            unit = it.unit,
+                            unit = it.unit.getLabel(context),
                             type = it.type,
                         )
                     }
@@ -95,7 +98,7 @@ fun ListFoodScreen(
 @Preview(showSystemUi = true)
 @Composable
 private fun ListFoodScreenPreview() {
-    var tabState by remember { mutableStateOf(FoodOption.Stock) }
+    var tabState by remember { mutableStateOf(FoodOption.STOCK) }
     val fakeItems = flowOf(
         PagingData.from(
             listOf(
@@ -104,27 +107,26 @@ private fun ListFoodScreenPreview() {
                     "Apple",
                     "2023-10-27",
                     1.0,
-                    "piece",
+                    FoodUnit.PIECE,
                     FoodForm.SOLID,
-                    FoodOption.Stock
+                    FoodOption.STOCK
                 ),
                 FoodItemCard(
                     1,
                     "Milk",
                     "2023-10-28",
                     1.0,
-                    "liter",
+                    FoodUnit.LITER,
                     FoodForm.LIQUID,
-                    FoodOption.Stock
+                    FoodOption.STOCK
                 )
             )
         )
-    )
-    val lazyPagingItems = fakeItems.collectAsLazyPagingItems()
+    ).collectAsLazyPagingItems()
     EaTzyTheme {
         ListFoodScreen(
             tabState = tabState,
-            lazyItems = lazyPagingItems,
+            lazyItems = fakeItems,
             onAddNewClicked = {},
             onNotificationClick = {},
             onTabChange = {

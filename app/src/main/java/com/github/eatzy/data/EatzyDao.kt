@@ -10,6 +10,7 @@ import androidx.room.Update
 import com.github.eatzy.domain.FoodUnit
 import com.github.eatzy.domain.FoodWasteChartData
 import com.github.eatzy.domain.LeftoverStatus
+import com.github.eatzy.domain.WastedFoodTrend
 
 @Dao
 interface EatzyDao {
@@ -74,7 +75,8 @@ interface EatzyDao {
     @Query("SELECT * FROM wasted_food where unit = :unit ORDER BY leftover_input_date DESC ")
     fun getAllWastedFoodByUnit(unit: FoodUnit): PagingSource<Int, WastedWithFoodItems>
 
-    @Query("""SELECT
+    @Query(
+        """SELECT
       (SELECT SUM(wf.leftover_quantity)
        FROM distributions d
        JOIN wasted_food wf ON d.leftover_food_id = wf.id) AS distributed,
@@ -91,4 +93,21 @@ interface EatzyDao {
       ) AS remaining"""
     )
     suspend fun getFoodWasteChartData(): FoodWasteChartData
+
+    @Query(
+        """
+    SELECT
+      strftime('%m', datetime(leftover_input_date / 1000, 'unixepoch')) AS month,
+      SUM(leftover_quantity) AS wastedTotal
+    FROM
+      wasted_food
+    WHERE
+      strftime('%Y', datetime(leftover_input_date / 1000, 'unixepoch')) = :currentYear
+    GROUP BY
+      month
+    ORDER BY
+      month ASC
+"""
+    )
+    suspend fun getWastedFoodEachMonth(currentYear: String): List<WastedFoodTrend>
 }

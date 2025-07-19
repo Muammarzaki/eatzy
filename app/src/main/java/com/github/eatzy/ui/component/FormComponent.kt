@@ -52,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -272,10 +273,11 @@ private fun DateInputFormPreview() {
 @Composable
 fun <T : Enum<T>> EnumDropdown(
     modifier: Modifier = Modifier,
-    label: String,
+    placeholder: String,
     options: List<T>,
     selectedOption: T,
-    onOptionSelected: (T) -> Unit
+    onOptionSelected: (T) -> Unit,
+    labelProvider: (T) -> String = { selectedOption.name }
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -285,9 +287,9 @@ fun <T : Enum<T>> EnumDropdown(
         modifier = modifier
     ) {
         WhiteInputTextFieldWithBorder(
-            value = selectedOption.name,
+            value = labelProvider(selectedOption),
             onValueChange = {},
-            placeholder = label,
+            placeholder = placeholder,
             readOnly = true,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryEditable, true)
@@ -298,7 +300,7 @@ fun <T : Enum<T>> EnumDropdown(
         ) {
             options.forEach { selectionOption ->
                 DropdownMenuItem(
-                    text = { Text(selectionOption.name) },
+                    text = { Text(labelProvider(selectionOption)) },
                     onClick = {
                         onOptionSelected(selectionOption)
                         expanded = false
@@ -317,7 +319,7 @@ private fun EnumDropdownPreview() {
             Spacer(modifier = Modifier.height(50.dp))
             var selectedOption by remember { mutableStateOf(SampleEnum.OPTION_1) }
             EnumDropdown(
-                label = "Sample Dropdown",
+                placeholder = "Sample Dropdown",
                 options = SampleEnum.entries,
                 selectedOption = selectedOption,
                 onOptionSelected = { selectedOption = it }
@@ -648,6 +650,7 @@ fun WastedFoodInputForm(
     initialData: WastedFood? = null,
     foodItems: LazyPagingItems<FoodItem> = flowOf(PagingData.empty<FoodItem>()).collectAsLazyPagingItems()
 ) {
+    val context = LocalContext.current
     var foodName by remember { mutableStateOf(initialData?.foodItem ?: "") }
     var foodItemId by remember { mutableIntStateOf(initialData?.foodItemId ?: 0) }
     val (selectedFoodForm, onFoodFormSelected) = remember { mutableStateOf(FoodForm.entries.first()) }
@@ -725,10 +728,11 @@ fun WastedFoodInputForm(
                 style = MaterialTheme.typography.bodyLarge
             )
             EnumDropdown(
-                label = "Unit",
+                placeholder = "Unit",
                 options = FoodUnit.entries,
                 selectedOption = unit,
-                onOptionSelected = { unit = it }
+                onOptionSelected = { unit = it },
+                labelProvider = { it.getLabel(context) }
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
@@ -742,10 +746,11 @@ fun WastedFoodInputForm(
                 style = MaterialTheme.typography.bodyLarge
             )
             EnumDropdown(
-                label = "Unit",
+                placeholder = "Unit",
                 options = FoodCondition.entries,
                 selectedOption = condition,
-                onOptionSelected = { condition = it }
+                onOptionSelected = { condition = it },
+                labelProvider = { it.getLabel(context) }
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
@@ -850,6 +855,7 @@ fun FoodInputForm(
     onSubmitted: (FoodItem) -> Unit,
     initialData: FoodItem? = null
 ) {
+    val context = LocalContext.current
     var foodName by remember { mutableStateOf(initialData?.foodName ?: "") }
     val (selectedFoodForm, onFoodFormSelected) = remember { mutableStateOf(FoodForm.entries.first()) }
     var foodType by remember { mutableStateOf(initialData?.foodType ?: "") }
@@ -909,10 +915,11 @@ fun FoodInputForm(
                 style = MaterialTheme.typography.bodyLarge
             )
             EnumDropdown(
-                label = "Unit",
+                placeholder = "Unit",
                 options = FoodUnit.entries,
                 selectedOption = unit,
-                onOptionSelected = { unit = it }
+                onOptionSelected = { unit = it },
+                labelProvider = { it.getLabel(context) }
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(

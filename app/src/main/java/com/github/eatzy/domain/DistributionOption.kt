@@ -1,8 +1,16 @@
 package com.github.eatzy.domain
 
-enum class DistributionOption(val label: String) {
-    Send("Send"),
-    Sent("Sent");
+import android.content.Context
+import com.github.eatzy.R
 
-    override fun toString(): String = label
+enum class DistributionOption {
+    Send,
+    Sent;
+
+    fun getLabel(context: Context): String {
+        return when (this) {
+            Send -> context.getString(R.string.distribution_option_send)
+            Sent -> context.getString(R.string.distribution_option_sent)
+        }
+    }
 }

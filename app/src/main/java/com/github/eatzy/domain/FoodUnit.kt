@@ -1,11 +1,22 @@
 package com.github.eatzy.domain
 
-enum class FoodUnit(override val label: String) : LabelEnum {
-    KILOGRAM("Kg"),
-    LITER("L"),
-    PACK("Pack"),
-    PORTION("Portion"),
-    PIECE("Pcs");
+import android.content.Context
+import com.github.eatzy.R
 
-    override fun toString() = label
+enum class FoodUnit {
+    KILOGRAM,
+    LITER,
+    PACK,
+    PORTION,
+    PIECE;
+
+    fun getLabel(context: Context): String {
+        return when (this) {
+            KILOGRAM -> context.getString(R.string.unit_kilogram)
+            LITER -> context.getString(R.string.unit_liter)
+            PACK -> context.getString(R.string.unit_pack)
+            PORTION -> context.getString(R.string.unit_portion)
+            PIECE -> context.getString(R.string.unit_piece)
+        }
+    }
 }

@@ -17,15 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.AccountBalanceWallet
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PieChart
-import androidx.compose.material.icons.outlined.AccountBalanceWallet
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.PieChart
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -40,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -47,8 +40,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -64,8 +58,8 @@ import com.github.eatzy.ui.theme.EaTzyTheme
 data class BottomNavItem(
     val route: Route,
     val label: String,
-    val selectedIcon: ImageVector,
-    val unselectedIcon: ImageVector,
+    val selectedIcon: Painter,
+    val unselectedIcon: Painter,
 )
 
 @Composable
@@ -85,30 +79,20 @@ fun BottomNavigationBar(
                 onClick = {
                     onItemSelected(index, item.route)
                 },
-                label = {
-                    Text(
-                        text = item.label,
-                        fontWeight = if (selectedItemIndex == index) FontWeight.Bold else FontWeight.Normal
-                    )
-                },
                 alwaysShowLabel = true,
                 icon = {
                     Icon(
-                        imageVector = if (selectedItemIndex == index) {
+                        painter = if (selectedItemIndex == index) {
                             item.selectedIcon
                         } else {
                             item.unselectedIcon
                         },
                         contentDescription = item.route.path,
-                        tint = if (selectedItemIndex == index) Color.White else Color(0xFF66BB6A) // Darker Green for unselected
+                        tint = Color.Unspecified
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color.White,
-                    selectedTextColor = Color.White,
-                    indicatorColor = Color(0xFF66BB6A),
-                    unselectedIconColor = Color(0xFF66BB6A),
-                    unselectedTextColor = Color.Gray
+                    indicatorColor = Color.Transparent,
                 ),
                 modifier = Modifier.padding(horizontal = 4.dp)
             )
@@ -123,26 +107,26 @@ private fun NavbarComponentPreview() {
         BottomNavItem(
             route = Route.HomeScreen,
             label = "Home",
-            selectedIcon = Icons.Filled.Home,
-            unselectedIcon = Icons.Outlined.Home,
+            selectedIcon = painterResource(R.drawable.ic_filled_home),
+            unselectedIcon = painterResource(R.drawable.ic_outlined_home),
         ),
         BottomNavItem(
             route = Route.FoodListScreen,
             label = "Food",
-            selectedIcon = Icons.Filled.AccountBalanceWallet,
-            unselectedIcon = Icons.Outlined.AccountBalanceWallet,
+            selectedIcon = painterResource(R.drawable.ic_filled_document),
+            unselectedIcon = painterResource(R.drawable.ic_outlined_document),
         ),
         BottomNavItem(
             route = Route.DistributionScreen,
             label = "Distribution",
-            selectedIcon = Icons.Filled.PieChart,
-            unselectedIcon = Icons.Outlined.PieChart,
+            selectedIcon = painterResource(R.drawable.ic_filled_pie),
+            unselectedIcon = painterResource(R.drawable.ic_outlined_pie),
         ),
         BottomNavItem(
             route = Route.ProfileScreen,
             label = "Profile",
-            selectedIcon = Icons.Filled.Person,
-            unselectedIcon = Icons.Outlined.Person,
+            selectedIcon = painterResource(R.drawable.ic_filled_people),
+            unselectedIcon = painterResource(R.drawable.ic_outlined_people),
         ),
     )
     EaTzyTheme {
@@ -153,7 +137,7 @@ private fun NavbarComponentPreview() {
                     .background(Color.LightGray)
                     .padding(bottom = 56.dp)
             ) {}
-            var selectedItemIndex by remember { mutableStateOf(0) }
+            var selectedItemIndex by remember { mutableIntStateOf(0) }
             BottomNavigationBar(
                 modifier = Modifier.align(Alignment.BottomCenter),
                 items = items,
@@ -169,12 +153,14 @@ private fun NavbarComponentPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopAppBarComponent(
+    modifier: Modifier = Modifier,
     showNotificationBadge: Boolean = false,
     title: String? = null,
     onBackClick: (() -> Unit)? = null,
     onNotificationClick: (() -> Unit)? = null
 ) {
     CenterAlignedTopAppBar(
+        modifier = modifier,
         title = {
             Column(
                 modifier = Modifier
@@ -199,7 +185,7 @@ fun TopAppBarComponent(
                         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                         tint = Color.White,
                         modifier = Modifier.size(24.dp),
-                        contentDescription = "Back"
+                        contentDescription = stringResource(R.string.back_button_desc)
                     )
                 }
             } else {
@@ -230,7 +216,7 @@ fun TopAppBarComponent(
                             imageVector = Icons.Default.Notifications,
                             tint = Color.White,
                             modifier = Modifier.size(24.dp),
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.notification_button_desc)
                         )
                     }
                 }
@@ -256,14 +242,14 @@ private fun TopAppBarComponentPreview() {
         Column(Modifier.background(MaterialTheme.colorScheme.tertiaryContainer)) {
             TopAppBarComponent(
                 showNotificationBadge = true,
-                title = stringResource(R.string.food_wasted),
+                title = stringResource(R.string.food_option_wasted),
                 onBackClick = {},
                 onNotificationClick = {})
             TopAppBarComponent(
-                title = stringResource(R.string.food_wasted),
+                title = stringResource(R.string.food_option_wasted),
                 onNotificationClick = {})
             TopAppBarComponent(
-                title = stringResource(R.string.food_wasted),
+                title = stringResource(R.string.food_option_wasted),
                 onBackClick = {},
             )
         }
@@ -304,7 +290,7 @@ fun <T : Enum<T>> Toggle(
                     Text(
                         text = optionTextProvider(option),
                         color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
-                        fontWeight = FontWeight.Bold, // Consider making this customizable
+                        fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -318,14 +304,9 @@ fun FoodToggle(onOptionSelected: (FoodOption) -> Unit = {}) {
     val context = LocalContext.current
     Toggle(
         options = FoodOption.entries.toTypedArray(),
-        initialSelectedOption = FoodOption.Stock,
+        initialSelectedOption = FoodOption.STOCK,
         onOptionSelected = onOptionSelected,
-        optionTextProvider = { foodType ->
-            when (foodType) {
-                FoodOption.Stock -> context.resources.getText(R.string.food_stock)
-                FoodOption.Wasted -> context.resources.getText(R.string.food_wasted)
-            } as String
-        }
+        optionTextProvider = { it.getLabel(context) }
     )
 }
 
@@ -336,12 +317,7 @@ fun DistributionToggle(onOptionSelected: (DistributionOption) -> Unit = {}) {
         options = DistributionOption.entries.toTypedArray(),
         initialSelectedOption = DistributionOption.Send,
         onOptionSelected = onOptionSelected,
-        optionTextProvider = { distributionState ->
-            when (distributionState) {
-                DistributionOption.Send -> context.resources.getText(R.string.distribution_send)
-                DistributionOption.Sent -> context.resources.getText(R.string.distribution_sent)
-            } as String
-        }
+        optionTextProvider = { it.getLabel(context) }
     )
 }
 

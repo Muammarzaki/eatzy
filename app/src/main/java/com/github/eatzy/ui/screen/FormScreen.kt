@@ -42,14 +42,14 @@ fun FoodFormScreen(
                     .background(Color.Unspecified),
             ) {
                 TopAppBarComponent(
-                    title = "Add New $option Food",
+                    title = "Add New ${if (option == FoodOption.STOCK) "Stock" else "Wasted"} Food",
                     onBackClick = onBackClicked,
                 )
             }
         }
     ) { paddingValues ->
         Column(Modifier.padding(paddingValues)) {
-            if (option == FoodOption.Stock) {
+            if (option == FoodOption.STOCK) {
                 FoodInputForm(
                     onSubmitted = {
                         onSubmitted(it, null)
@@ -75,11 +75,11 @@ fun FoodFormScreen(
 fun UpdateFoodFormScreenPreview() {
     EaTzyTheme {
         FoodFormScreen(
-            option = FoodOption.Stock,
+            option = FoodOption.STOCK,
             lazyFoodItem = flowOf(PagingData.empty<FoodItem>()).collectAsLazyPagingItems(),
             initialFoodItem = FoodItem(
                 id = 1,
-                foodName = "Nasi Goreng",
+                foodName = "Fries Rice",
                 foodType = "Main Course",
                 expirationDate = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 5) }.time,
                 initialQuantity = 2.0,
@@ -96,7 +96,7 @@ fun UpdateWastedFormScreenPreview() {
         FoodFormScreen(
             option = FoodOption.Wasted,
             lazyFoodItem = flowOf(PagingData.empty<FoodItem>()).collectAsLazyPagingItems(),
-            initialWastedFood =  WastedFood(
+            initialWastedFood = WastedFood(
                 foodItemId = 1,
                 leftoverQuantity = 2.0,
                 unit = FoodUnit.PORTION,
@@ -107,7 +107,7 @@ fun UpdateWastedFormScreenPreview() {
                         add(Calendar.DAY_OF_YEAR, 2)
                     }.time,
                 form = FoodForm.SOLID,
-                foodItem = "Nasi Goreng"
+                foodItem = "Fries Rice"
             )
         )
     }
@@ -118,7 +118,7 @@ fun UpdateWastedFormScreenPreview() {
 fun FoodFormScreenPreview() {
     EaTzyTheme {
         FoodFormScreen(
-            option = FoodOption.Stock,
+            option = FoodOption.STOCK,
             lazyFoodItem = flowOf(PagingData.empty<FoodItem>()).collectAsLazyPagingItems()
         )
     }

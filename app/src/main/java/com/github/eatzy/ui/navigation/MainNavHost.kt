@@ -80,23 +80,29 @@ fun MainNavHost(
         }
         composable(Route.HomeScreen.path) {
             val wastedFood = viewModel.wastedFoodsByUnit.collectAsLazyPagingItems()
-            val chartData = viewModel.chartData.collectAsState()
+            val chartData by viewModel.summaryChartData.collectAsState()
+            val wastedTrend by viewModel.dataWastedFoodEachMonth.collectAsState()
             LaunchedEffect(Unit) {
                 viewModel.selectUnit(FoodUnit.KILOGRAM)
+                viewModel.loadWastedFoodEachMonth()
             }
             HomeScreen(
-                chartData = chartData.value,
+                chartData = chartData,
+                trendData = wastedTrend,
                 lazyItems = wastedFood,
                 bottomBar = bottomBar,
                 onTagSelected = {
                     viewModel.selectUnit(it)
+                },
+                onNotificationClick = {
+                    navController.navigate(Route.NotificationScreen.path)
                 }
             )
         }
         composable(Route.FoodListScreen.path) {
-            var tabState by remember { mutableStateOf(FoodOption.Stock) }
+            var tabState by remember { mutableStateOf(FoodOption.STOCK) }
             val lazyFood =
-                if (tabState == FoodOption.Stock) viewModel.foodItemsCard.collectAsLazyPagingItems()
+                if (tabState == FoodOption.STOCK) viewModel.foodItemsCard.collectAsLazyPagingItems()
                 else viewModel.wastedFoods.collectAsLazyPagingItems()
             ListFoodScreen(
                 onNotificationClick = {
@@ -160,13 +166,13 @@ fun MainNavHost(
                             wastedFood = viewModel.findWastedFoodById(it)
                         }
 
-                        FoodOption.Stock -> {
+                        FoodOption.STOCK -> {
                             initialFoodItem = viewModel.findFoodItemById(it)
                         }
                     }
                 }
             }
-            if (option == FoodOption.Stock && foodIdArg > -1 && initialFoodItem == null) {
+            if (option == FoodOption.STOCK && foodIdArg > -1 && initialFoodItem == null) {
                 CircularProgressIndicator(modifier = Modifier.fillMaxSize())
             } else if (option == FoodOption.Wasted && foodIdArg > -1 && wastedFood == null) {
                 CircularProgressIndicator(modifier = Modifier.fillMaxSize())
@@ -180,7 +186,7 @@ fun MainNavHost(
                     option = option,
                     onSubmitted = { foodStock, foodWasted ->
                         when (option) {
-                            FoodOption.Stock -> foodStock?.let {
+                            FoodOption.STOCK -> foodStock?.let {
                                 viewModel.saveFoodItemStock(
                                     FoodItem(
                                         id = initialFoodItem?.id,
@@ -227,6 +233,8 @@ fun MainNavHost(
                     ?: return@composable
             var distributionDetails by remember { mutableStateOf<WastedFood?>(null) }
 
+            val recipient = viewModel.recipients.collectAsLazyPagingItems()
+
             LaunchedEffect(distributionIdArg) {
                 distributionDetails = viewModel.findWastedFoodById(distributionIdArg)
             }
@@ -238,7 +246,8 @@ fun MainNavHost(
                 wastedFood = distributionDetails ?: return@composable,
                 onSubmitted = {
                     navController.popBackStack()
-                }
+                },
+                recipient = recipient
             )
         }
         composable(Route.NotificationScreen.path) {

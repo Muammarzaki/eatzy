@@ -1,8 +1,16 @@
 package com.github.eatzy.domain
 
-enum class FoodOption(override val label: String) : LabelEnum {
-    Stock("Stock"),
-    Wasted("Wasted");
+import android.content.Context
+import com.github.eatzy.R
 
-    override fun toString(): String = label
+enum class FoodOption {
+    STOCK,
+    Wasted;
+
+    fun getLabel(context: Context): String {
+        return when (this) {
+            STOCK -> context.getString(R.string.food_option_stock)
+            Wasted -> context.getString(R.string.food_option_wasted)
+        }
+    }
 }

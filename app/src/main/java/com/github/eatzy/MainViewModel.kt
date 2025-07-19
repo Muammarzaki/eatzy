@@ -18,8 +18,10 @@ import com.github.eatzy.domain.Recipient
 import com.github.eatzy.domain.UnreadableNotification
 import com.github.eatzy.domain.User
 import com.github.eatzy.domain.WastedFood
+import com.github.eatzy.domain.WastedFoodTrend
 import com.github.eatzy.ui.screen.DistributionItem
 import com.github.eatzy.ui.screen.FoodItemCard
+import com.github.eatzy.util.toStringDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -31,6 +33,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.Calendar
 
 class MainViewModel(private val repository: DataRepository) : ViewModel() {
 
@@ -42,9 +45,9 @@ class MainViewModel(private val repository: DataRepository) : ViewModel() {
             pagingData.map { foodItem ->
                 FoodItemCard(
                     foodName = foodItem.foodItem,
-                    date = foodItem.leftoverInputDate.toString(),
+                    date = foodItem.leftoverInputDate?.toStringDate("dd MMMM yyyy") ?: "",
                     size = foodItem.leftoverQuantity,
-                    unit = foodItem.unit.toString(),
+                    unit = foodItem.unit,
                     option = FoodOption.Wasted,
                     id = foodItem.id ?: -1
                 )
@@ -57,10 +60,10 @@ class MainViewModel(private val repository: DataRepository) : ViewModel() {
             pagingData.map { foodItem ->
                 FoodItemCard(
                     foodName = foodItem.foodName,
-                    date = foodItem.inputDate.toString(),
+                    date = foodItem.inputDate?.toStringDate("dd MMMM yyyy") ?: "",
                     size = foodItem.initialQuantity,
-                    unit = foodItem.unit.toString(),
-                    option = FoodOption.Stock,
+                    unit = foodItem.unit,
+                    option = FoodOption.STOCK,
                     id = foodItem.id ?: -1
                 )
             }
@@ -169,7 +172,7 @@ class MainViewModel(private val repository: DataRepository) : ViewModel() {
     }
 
     private val _chartData = MutableStateFlow<FoodWasteChartData?>(null)
-    val chartData: StateFlow<FoodWasteChartData?> = _chartData.asStateFlow()
+    val summaryChartData: StateFlow<FoodWasteChartData?> = _chartData.asStateFlow()
 
 
     private fun fetchChartData() {
@@ -178,6 +181,26 @@ class MainViewModel(private val repository: DataRepository) : ViewModel() {
             _chartData.value = data
         }
     }
+
+    private val _currentYear = MutableStateFlow<String?>(null)
+    val currentYear: StateFlow<String?> = _currentYear.asStateFlow()
+
+    fun setCurrentYear(year: String) {
+        _currentYear.value = year
+    }
+
+
+    private val _dataWastedFoodEachMonth = MutableStateFlow<List<WastedFoodTrend>>(emptyList())
+    val dataWastedFoodEachMonth: StateFlow<List<WastedFoodTrend>> = _dataWastedFoodEachMonth
+
+    fun loadWastedFoodEachMonth() {
+        val year = _currentYear.value ?: return
+        viewModelScope.launch {
+            val result = repository.getWastedFoodEachMonth(year)
+            _dataWastedFoodEachMonth.value = result
+        }
+    }
+
 
     companion object {
         val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
@@ -197,5 +220,10 @@ class MainViewModel(private val repository: DataRepository) : ViewModel() {
 
     init {
         fetchChartData()
+        setCurrentYear(getCurrentYear())
+    }
+
+    private fun getCurrentYear(): String {
+        return Calendar.getInstance().get(Calendar.YEAR).toString()
     }
 }
