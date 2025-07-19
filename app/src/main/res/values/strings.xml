@@ -36,4 +36,6 @@
     <string name="food_condition_disposed">Layak Buang</string>
     <string name="status_confirm">Status Terkonfirmasi</string>
     <string name="notification_button_desc">Tombol Notifikasi</string>
+    <string name="status_read">Telah Dibaca</string>
+    <string name="status_unread">Belum Dibaca</string>
 </resources>

@@ -43,8 +43,8 @@ fun NotificationScreen(
                 .padding(horizontal = 16.dp)
         ) {
             LazyColumn(
-                contentPadding = PaddingValues(vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                contentPadding = PaddingValues(vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(unreadableNotifications.itemCount) { index ->
                     val notification = unreadableNotifications.peek(index)

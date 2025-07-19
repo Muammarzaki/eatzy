@@ -22,6 +22,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LineWeight
 import androidx.compose.material.icons.filled.LocationOn
@@ -591,11 +593,24 @@ private fun DestinationDistributionCardPreview() {
 }
 
 @Composable
-fun SimpleNotificationCard(subject: String, message: String, modifier: Modifier = Modifier) {
+fun SimpleNotificationCard(
+    subject: String,
+    message: String,
+    modifier: Modifier = Modifier,
+    isRead: Boolean = false,
+    onReadeChange: (Boolean) -> Unit = {}
+) {
+    var expanded by remember { mutableStateOf(false) }
+    var currentIsRead by remember { mutableStateOf(isRead) }
+
     Card(
         modifier = modifier
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+            .fillMaxWidth()
+            .clickable {
+                expanded = !expanded
+                onReadeChange(true)
+            },
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         ),
@@ -603,33 +618,37 @@ fun SimpleNotificationCard(subject: String, message: String, modifier: Modifier 
             defaultElevation = 2.dp
         )
     ) {
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(Modifier.weight(4f)) {
-                Text(
-                    overflow = Ellipsis,
-                    text = subject,
-                    maxLines = 1,
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Text(
-                    text = message,
-                    overflow = Ellipsis,
-                    maxLines = 3,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
-                )
+        Box {
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(Modifier.weight(4f)) {
+                    Text(
+                        overflow = Ellipsis,
+                        text = subject,
+                        maxLines = if (expanded) Int.MAX_VALUE else 1,
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Text(
+                        text = message,
+                        overflow = Ellipsis,
+                        maxLines = if (expanded) Int.MAX_VALUE else 3,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray
+                    )
+                }
             }
-            Spacer(modifier = Modifier.width(8.dp))
-            Column {
+            if (!expanded) {
                 Icon(
-                    painter = painterResource(R.drawable.arrow_green_check),
-                    contentDescription = stringResource(R.string.status_confirm),
+                    imageVector = if (isRead) Icons.Default.CheckCircle else Icons.Default.Circle,
+                    contentDescription = stringResource(if (currentIsRead) R.string.status_read else R.string.status_unread),
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(34.dp)
+                    modifier = Modifier
+                        .size(34.dp)
+                        .align(Alignment.BottomEnd)
+                        .offset(x = 4.dp, y = 4.dp)
 
                 )
             }
@@ -640,11 +659,23 @@ fun SimpleNotificationCard(subject: String, message: String, modifier: Modifier 
 @Preview(showBackground = true, backgroundColor = 0xFFC8E6C9)
 @Composable
 fun NotificationCardPreview() {
-    EaTzyTheme {
+    Column {
+        var isRead1 by remember { mutableStateOf(true) }
+        var isRead2 by remember { mutableStateOf(false) }
         SimpleNotificationCard(
+            isRead = isRead1,
+            onReadeChange = { isRead1 = it },
             modifier = Modifier.padding(16.dp),
             subject = "Orphanage is willing to accept allocated food",
             message = "Note type, Fried Rice. This is an example of a longer message. Hope it can help you. Thank you for your attention."
+        )
+        SimpleNotificationCard(
+            isRead = isRead2,
+            onReadeChange = { isRead2 = it },
+            modifier = Modifier.padding(16.dp),
+            subject = "Orphanage is willing to accept allocated food",
+            message =
+                "Note type, Fried Rice. This is an example of a longer message. Hope it can help you. Thank you for your attention."
         )
     }
 }
