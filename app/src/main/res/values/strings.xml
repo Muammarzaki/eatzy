@@ -38,4 +38,27 @@
     <string name="notification_button_desc">Tombol Notifikasi</string>
     <string name="status_read">Telah Dibaca</string>
     <string name="status_unread">Belum Dibaca</string>
+    <string name="register_title">Register to Food Waste</string>
+    <string name="register_sub">Fill the form below to register to our food waste app service</string>
+    <string name="choice_the_food">Pilih Makanan</string>
+    <string name="date_picker_button">OK</string>
+    <string name="owner_name_placeholder">Owner Name</string>
+    <string name="phone_number_placeholder">Phone Number</string>
+    <string name="email_placeholder">Email</string>
+    <string name="business_name_placeholder">Business name</string>
+    <string name="address_placeholder">Address</string>
+    <string name="i_have_read_the">"I have read the "</string>
+    <string name="and_i_agree">" and I agree"</string>
+    <string name="and"><![CDATA[&]]></string>
+    <string name="privacy">Privacy</string>
+    <string name="policy">Policy</string>
+    <string name="food_name_label">Nama Makanan</string>
+    <string name="quantity_label">Quantity</string>
+    <string name="wasted_quantity_placeholder">Jumlah Sisa</string>
+    <string name="unit_label">Unit</string>
+    <string name="condition_placeholder">Condition</string>
+    <string name="expiry_date_label">Expiry Date</string>
+    <string name="food_form_label">Food Form</string>
+    <string name="submit_label">Submit</string>
+    <string name="type_label">Type</string>
 </resources>

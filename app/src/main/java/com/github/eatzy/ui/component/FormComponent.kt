@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,6 +27,8 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
@@ -53,6 +56,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -60,11 +66,13 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.github.eatzy.R
 import com.github.eatzy.domain.FoodCondition
 import com.github.eatzy.domain.FoodForm
 import com.github.eatzy.domain.FoodItem
@@ -72,6 +80,7 @@ import com.github.eatzy.domain.FoodUnit
 import com.github.eatzy.domain.WastedFood
 import com.github.eatzy.ui.theme.DarkGreen
 import com.github.eatzy.ui.theme.EaTzyTheme
+import com.github.eatzy.ui.theme.LightGreen
 import kotlinx.coroutines.flow.flowOf
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -91,7 +100,10 @@ fun FoodHistorySelectorDialog(
             onDismissRequest = onDismiss,
             confirmButton = {},
             title = {
-                Text(text = "Pilih Makanan", style = MaterialTheme.typography.titleLarge)
+                Text(
+                    text = stringResource(R.string.choice_the_food),
+                    style = MaterialTheme.typography.titleLarge
+                )
             },
             text = {
                 LazyColumn(
@@ -136,7 +148,7 @@ private fun DialogSelectorPreview() {
             foodList = flowOf(PagingData.from((1..20).map { index ->
                 FoodItem(
                     id = index,
-                    foodName = "Makanan Contoh $index",
+                    foodName = "Food $index",
                     inputDate = Date(),
                     foodType = "Main Course",
                     expirationDate = Date(),
@@ -248,7 +260,7 @@ fun DateInputForm(
                             onDateSelected(day, month, year)
                         }
                     }) {
-                        Text("OK")
+                        Text(stringResource(R.string.date_picker_button))
                     }
                 }
             ) {
@@ -334,11 +346,16 @@ fun WhiteButton(
     modifier: Modifier,
     onClick: () -> Unit,
     text: String,
-    contentPadding: PaddingValues = PaddingValues(0.dp)
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    enabled: Boolean = true
 ) {
     TextButton(
+        enabled = enabled,
         onClick = onClick,
-        colors = ButtonDefaults.buttonColors(Color.White),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.White,
+            disabledContainerColor = LightGreen
+        ),
         modifier = modifier
     ) {
         Text(
@@ -405,7 +422,7 @@ fun LoginFormComponent(
                 .align(Alignment.CenterHorizontally),
             onClick = { onLoginClicked(username, password) },
             text = "Login",
-            contentPadding = PaddingValues(horizontal = 80.dp)
+            contentPadding = PaddingValues(horizontal = 80.dp),
         )
     }
 }
@@ -427,7 +444,7 @@ private fun LoginComponentPreview() {
 fun RegistrationFormComponent(
     modifier: Modifier = Modifier,
     onRegisterClicked: (FoodMerchantRegistrationData) -> Unit,
-    onAlreadyHaveAccountClicked: () -> Unit,
+    onPrivacyPolicyClicked: () -> Unit = {}
 ) {
     var ownerName by remember { mutableStateOf("") }
     var businessName by remember { mutableStateOf("") }
@@ -435,17 +452,33 @@ fun RegistrationFormComponent(
     var phoneNumber by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var confirmLicenseAgreement by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
             .padding(16.dp),
     ) {
+        Text(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            text = stringResource(R.string.register_title),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.surface
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 40.dp),
+            text = stringResource(R.string.register_sub),
+            color = MaterialTheme.colorScheme.surface
+        )
+        Spacer(modifier = Modifier.height(16.dp))
         WhiteInputTextField(
             value = ownerName,
             onValueChange = { ownerName = it },
             placeholder = {
                 Text(
-                    "Owner Name",
+                    stringResource(R.string.owner_name_placeholder),
                     color = MaterialTheme.colorScheme.outline,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -463,7 +496,7 @@ fun RegistrationFormComponent(
             onValueChange = { phoneNumber = it },
             placeholder = {
                 Text(
-                    "Phone Number",
+                    text = stringResource(R.string.phone_number_placeholder),
                     color = MaterialTheme.colorScheme.outline,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -480,7 +513,7 @@ fun RegistrationFormComponent(
             onValueChange = { email = it },
             placeholder = {
                 Text(
-                    "Email",
+                    text = stringResource(R.string.email_placeholder),
                     color = MaterialTheme.colorScheme.outline,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -496,7 +529,7 @@ fun RegistrationFormComponent(
             onValueChange = { businessName = it },
             placeholder = {
                 Text(
-                    "Business name",
+                    text = stringResource(R.string.business_name_placeholder),
                     color = MaterialTheme.colorScheme.outline,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -510,7 +543,7 @@ fun RegistrationFormComponent(
             onValueChange = { address = it },
             placeholder = {
                 Text(
-                    "Address",
+                    text = stringResource(R.string.address_placeholder),
                     color = MaterialTheme.colorScheme.outline,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -534,18 +567,53 @@ fun RegistrationFormComponent(
                 imeAction = ImeAction.Done
             )
         )
-        TextButton(
-            onClick = onAlreadyHaveAccountClicked,
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            Checkbox(
+                checked = confirmLicenseAgreement,
+                onCheckedChange = { confirmLicenseAgreement = it },
+                colors = CheckboxDefaults.colors(
+                    checkedColor = Color.White,
+                    uncheckedColor = Color.White,
+                    checkmarkColor = Color.Black
+                )
+            )
             Text(
-                text = "Already Have Account ?",
+                text = buildAnnotatedString {
+                    append(stringResource(R.string.i_have_read_the))
+
+                    withStyle(
+                        style = SpanStyle(
+                            color = Color.Black,
+                            textDecoration = TextDecoration.Underline
+                        )
+                    ) {
+                        append(stringResource(R.string.privacy))
+                        append(stringResource(R.string.and))
+                        append(stringResource(R.string.policy))
+                    }
+
+                    append(stringResource(R.string.and_i_agree))
+                },
                 color = Color.White,
                 textAlign = TextAlign.Start,
-                textDecoration = TextDecoration.Underline
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .clickable {
+                        onPrivacyPolicyClicked()
+                    }
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
         WhiteButton(
+            enabled = confirmLicenseAgreement,
+            modifier = Modifier
+                .wrapContentSize()
+                .align(Alignment.CenterHorizontally),
             onClick = {
                 onRegisterClicked(
                     FoodMerchantRegistrationData(
@@ -558,11 +626,8 @@ fun RegistrationFormComponent(
                     )
                 )
             },
-            modifier = Modifier
-                .wrapContentSize()
-                .align(Alignment.CenterHorizontally),
             text = "Register",
-            contentPadding = PaddingValues(horizontal = 80.dp)
+            contentPadding = PaddingValues(horizontal = 80.dp),
         )
     }
 }
@@ -583,7 +648,6 @@ private fun RegistrationFormPreview() {
         RegistrationFormComponent(
             modifier = Modifier.background(MaterialTheme.colorScheme.tertiaryContainer),
             onRegisterClicked = { },
-            onAlreadyHaveAccountClicked = {},
         )
 
     }
@@ -669,7 +733,7 @@ fun WastedFoodInputForm(
         ) {
 
             Text(
-                text = "Food Name",
+                text = stringResource(R.string.food_name_label),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 5.dp),
@@ -683,7 +747,7 @@ fun WastedFoodInputForm(
                 onValueChange = { foodName = it },
                 readOnly = true,
                 enabled = false,
-                placeholder = "Nama Makanan",
+                placeholder = stringResource(R.string.food_name_label),
                 borderColor = DarkGreen,
                 onClick = {
                     modalState = true
@@ -701,7 +765,7 @@ fun WastedFoodInputForm(
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "Quantity",
+                text = stringResource(R.string.quantity_label),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 5.dp),
@@ -713,12 +777,12 @@ fun WastedFoodInputForm(
             WhiteInputTextFieldWithBorder(
                 value = quantity,
                 onValueChange = { quantity = it },
-                placeholder = "Jumlah Sisa",
+                placeholder = stringResource(R.string.wasted_quantity_placeholder),
                 borderColor = DarkGreen
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "Unit",
+                text = stringResource(R.string.unit_label),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 5.dp),
@@ -728,7 +792,7 @@ fun WastedFoodInputForm(
                 style = MaterialTheme.typography.bodyLarge
             )
             EnumDropdown(
-                placeholder = "Unit",
+                placeholder = stringResource(R.string.unit_label),
                 options = FoodUnit.entries,
                 selectedOption = unit,
                 onOptionSelected = { unit = it },
@@ -736,7 +800,7 @@ fun WastedFoodInputForm(
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "Condition",
+                text = stringResource(R.string.condition_placeholder),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 5.dp),
@@ -746,7 +810,7 @@ fun WastedFoodInputForm(
                 style = MaterialTheme.typography.bodyLarge
             )
             EnumDropdown(
-                placeholder = "Unit",
+                placeholder = stringResource(R.string.condition_placeholder),
                 options = FoodCondition.entries,
                 selectedOption = condition,
                 onOptionSelected = { condition = it },
@@ -754,7 +818,7 @@ fun WastedFoodInputForm(
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "Expiry Date",
+                text = stringResource(R.string.expiry_date_label),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 5.dp),
@@ -775,7 +839,7 @@ fun WastedFoodInputForm(
 
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = "Food Form",
+                text = stringResource(R.string.food_form_label),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 5.dp),
@@ -817,7 +881,7 @@ fun WastedFoodInputForm(
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth(),
             textColor = Color.White,
-            text = "Submit"
+            text = stringResource(R.string.submit_label)
         )
     }
 }
@@ -841,7 +905,7 @@ fun WastedFoodInputFormPreview() {
                         add(Calendar.DAY_OF_YEAR, 2)
                     }.time,
                 form = FoodForm.SOLID,
-                foodItem = "Nasi Goreng"
+                foodItem = "Fries Rice"
             ),
             foodItems = foodItems
         )
@@ -871,7 +935,7 @@ fun FoodInputForm(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Food Name",
+                text = stringResource(R.string.food_name_label),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 5.dp),
@@ -883,12 +947,12 @@ fun FoodInputForm(
             WhiteInputTextFieldWithBorder(
                 value = foodName,
                 onValueChange = { foodName = it },
-                placeholder = "Nama Makanan",
+                placeholder = stringResource(R.string.food_name_label),
                 borderColor = DarkGreen
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "Quantity",
+                text = stringResource(R.string.quantity_label),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 5.dp),
@@ -900,12 +964,12 @@ fun FoodInputForm(
             WhiteInputTextFieldWithBorder(
                 value = quantity,
                 onValueChange = { quantity = it },
-                placeholder = "Jumlah",
+                placeholder = stringResource(R.string.quantity_label),
                 borderColor = DarkGreen
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "Unit",
+                text = stringResource(R.string.unit_label),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 5.dp),
@@ -915,7 +979,7 @@ fun FoodInputForm(
                 style = MaterialTheme.typography.bodyLarge
             )
             EnumDropdown(
-                placeholder = "Unit",
+                placeholder = stringResource(R.string.unit_label),
                 options = FoodUnit.entries,
                 selectedOption = unit,
                 onOptionSelected = { unit = it },
@@ -923,7 +987,7 @@ fun FoodInputForm(
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "Type",
+                text = stringResource(R.string.type_label),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 5.dp),
@@ -935,12 +999,12 @@ fun FoodInputForm(
             WhiteInputTextFieldWithBorder(
                 value = foodType,
                 onValueChange = { foodType = it },
-                placeholder = "Jenis Makanan",
+                placeholder = stringResource(R.string.type_label),
                 borderColor = DarkGreen
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "Expiry Date",
+                text = stringResource(R.string.expiry_date_label),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 5.dp),
@@ -961,7 +1025,7 @@ fun FoodInputForm(
             )
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = "Food Form",
+                text = stringResource(R.string.food_form_label),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 5.dp),
@@ -1002,7 +1066,7 @@ fun FoodInputForm(
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth(),
             textColor = Color.White,
-            text = "Submit"
+            text = stringResource(R.string.submit_label)
         )
     }
 }
@@ -1016,7 +1080,7 @@ fun FoodInputFormPreview() {
             onSubmitted = {},
             initialData = FoodItem(
                 id = 1,
-                foodName = "Nasi Goreng",
+                foodName = "Fries Rice",
                 foodType = "Main Course",
                 expirationDate = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 5) }.time,
                 initialQuantity = 2.0,
