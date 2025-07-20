@@ -12,6 +12,7 @@ sealed class Route(val path: String) {
     object FoodListScreen : Route("food_list_screen")
     object DistributionScreen : Route("distribution_screen")
     object NotificationScreen : Route("notification_screen")
+    object SubmitTransitionScreen : Route("submit_tr_screen")
 
 
     object FormScreen : Route("form_screen/{option}?foodId={foodId}") {

@@ -30,7 +30,7 @@ data class DistributionEntity(
     @ColumnInfo(name = "leftover_food_id", index = true)
     val leftoverFoodId: Int,
     @ColumnInfo(name = "recipient_id", index = true)
-    val recipientId: String,
+    val recipientId: Int,
     @ColumnInfo(name = "distribution_date")
     val distributionDate: Date,
     val notes: String?,

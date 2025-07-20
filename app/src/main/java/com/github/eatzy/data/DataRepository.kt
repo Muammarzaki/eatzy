@@ -232,6 +232,21 @@ class DataRepository(private val eatzyDao: EatzyDao) : BusinessUseCase {
         )
     }
 
+    override suspend fun saveDistribution(
+        wastedFoofId: Int,
+        recipientId: Int,
+        notes: String?
+    ) {
+        eatzyDao.addDistribution(
+            DistributionEntity(
+                leftoverFoodId = wastedFoofId,
+                recipientId = recipientId,
+                notes = notes,
+                distributionDate = Date()
+            )
+        )
+    }
+
     override suspend fun saveUser(user: User): Int {
         return eatzyDao.addUser(
             UserEntity(

@@ -33,6 +33,9 @@ interface EatzyDao {
     @Query("SELECT * FROM unreadable_notifications where is_read = 0 ORDER BY timestamp DESC ")
     fun getAllUnreadableNotifications(): PagingSource<Int, UnreadableNotificationEntity>
 
+    @Query("SELECT * FROM wasted_food where unit = :unit ORDER BY leftover_input_date DESC ")
+    fun getAllWastedFoodByUnit(unit: FoodUnit): PagingSource<Int, WastedWithFoodItems>
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun addWastedFood(wastedFood: WastedFoodEntity): Long
 
@@ -47,15 +50,6 @@ interface EatzyDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun addDistribution(distribution: DistributionEntity): Long
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun addRecipient(recipient: RecipientEntity): Long
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun addUnreadableNotification(unreadableNotification: UnreadableNotificationEntity): Long
-
-    @Query("UPDATE unreadable_notifications SET is_read = 1 WHERE id = :id")
-    suspend fun markNotificationAsRead(id: Int)
 
     @Query("SELECT * FROM users WHERE owner_name = :username")
     suspend fun getUserByUsername(username: String): UserWithBusinesses?
@@ -72,8 +66,6 @@ interface EatzyDao {
     @Query("SELECT * FROM food_items WHERE id = :id")
     suspend fun getFoodItemById(id: Int): FoodItemEntity?
 
-    @Query("SELECT * FROM wasted_food where unit = :unit ORDER BY leftover_input_date DESC ")
-    fun getAllWastedFoodByUnit(unit: FoodUnit): PagingSource<Int, WastedWithFoodItems>
 
     @Query(
         """SELECT

@@ -126,6 +126,12 @@ class MainViewModel(private val repository: DataRepository) : ViewModel() {
         }
     }
 
+    fun saveDistribution(wastedFoofId: Int, recipientId: Int, notes: String?) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.saveDistribution(wastedFoofId, recipientId, notes)
+        }
+    }
+
     fun registerUser(user: User, onRegistrationComplete: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.saveUser(user)

@@ -23,6 +23,7 @@ import com.github.eatzy.domain.FoodUnit
 import com.github.eatzy.domain.User
 import com.github.eatzy.domain.WastedFood
 import com.github.eatzy.ui.screen.DistributingScreen
+import com.github.eatzy.ui.screen.DistributionSuccessScreen
 import com.github.eatzy.ui.screen.FoodFormScreen
 import com.github.eatzy.ui.screen.HomeScreen
 import com.github.eatzy.ui.screen.ListDistributionScreen
@@ -245,7 +246,12 @@ fun MainNavHost(
                 },
                 wastedFood = distributionDetails ?: return@composable,
                 onSubmitted = {
-                    navController.popBackStack()
+                    viewModel.saveDistribution(
+                        wastedFoofId = distributionDetails?.id ?: return@DistributingScreen,
+                        recipientId = it.recipientId,
+                        notes = it.notes
+                    )
+                    navController.navigate(Route.SubmitTransitionScreen.path)
                 },
                 recipient = recipient
             )
@@ -258,6 +264,15 @@ fun MainNavHost(
                     navController.popBackStack()
                 }
             )
+        }
+        composable(Route.SubmitTransitionScreen.path) {
+            DistributionSuccessScreen {
+                navController.navigate(Route.DistributingScreen.path) {
+                    popUpTo(Route.HomeScreen.path) {
+                        inclusive = true
+                    }
+                }
+            }
         }
     }
 }
