@@ -379,7 +379,23 @@ fun LoginFormComponent(
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    Column(modifier = modifier.padding(16.dp)) {
+    Column(modifier = modifier.padding(horizontal = 16.dp)) {
+        Text(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            text = stringResource(R.string.login_title),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.surface
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 40.dp),
+            text = stringResource(R.string.login_sub),
+            color = MaterialTheme.colorScheme.surface
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
         WhiteInputTextField(
             value = username,
             onValueChange = { username = it },
@@ -456,7 +472,7 @@ fun RegistrationFormComponent(
 
     Column(
         modifier = modifier
-            .padding(16.dp),
+            .padding(horizontal = 16.dp),
     ) {
         Text(
             modifier = Modifier.align(Alignment.CenterHorizontally),

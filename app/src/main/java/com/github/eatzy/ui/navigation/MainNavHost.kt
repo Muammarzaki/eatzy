@@ -73,7 +73,7 @@ fun MainNavHost(
                             ),
                         ),
                         onRegistrationComplete = {
-                            navController.navigate(Route.HomeScreen.path)
+                            navController.navigate(Route.LoginScreen.path)
                         }
                     )
                 }

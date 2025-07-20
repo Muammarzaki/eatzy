@@ -54,4 +54,6 @@
     <string name="type_label">Type</string>
     <string name="continue_button">Lanjutkan</string>
     <string name="distributing_success_message">Item dalam proses pengiriman</string>
+    <string name="login_title">Login to Food Waste</string>
+    <string name="login_sub">Log into the apps to manage your \nwaste effectively</string>
 </resources>

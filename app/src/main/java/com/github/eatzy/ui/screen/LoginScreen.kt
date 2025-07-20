@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -45,7 +46,6 @@ import com.github.eatzy.ui.component.LoginFormComponent
 import com.github.eatzy.ui.component.RegistrationFormComponent
 import com.github.eatzy.ui.component.WhiteButton
 import com.github.eatzy.ui.theme.EaTzyTheme
-import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,19 +54,22 @@ fun LoginScreen(
     onPrivacyPolicyClicked: () -> Unit = {},
     onLoginClicked: ((String, String) -> Unit)? = null,
     onRegisterClicked: ((FoodMerchantRegistrationData) -> Unit)? = null,
+    onGoogleIconClicked: () -> Unit = {},
+    onFacebookIconClicked: () -> Unit = {}
 ) {
     var optionState by remember { mutableStateOf("") }
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
-        confirmValueChange = { true }
+        confirmValueChange = {
+            optionState = ""
+            it != SheetValue.Hidden
+        }
     )
     LaunchedEffect(sheetState) {
         snapshotFlow { sheetState.currentValue }
             .collect { value ->
                 if (value == SheetValue.Hidden) {
-                    optionState = ""
-                    delay(100)
-                    sheetState.expand()
+                    sheetState.show()
                 }
             }
     }
@@ -155,7 +158,12 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    IconButton(onClick = {/*TODO*/ }) {
+                    IconButton(
+                        onClick = onGoogleIconClicked,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = Color.White
+                        )
+                    ) {
                         Icon(
                             painter = painterResource(R.drawable.icons8_google),
                             modifier = Modifier.size(32.dp),
@@ -163,7 +171,12 @@ fun LoginScreen(
                             tint = Color.Unspecified
                         )
                     }
-                    IconButton(onClick = {/*TODO*/ }) {
+                    IconButton(
+                        onClick = onFacebookIconClicked,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = Color.White
+                        )
+                    ) {
                         Icon(
                             painter = painterResource(R.drawable.icons8_facebook),
                             contentDescription = "Facebook Login",

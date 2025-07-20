@@ -16,7 +16,7 @@ import androidx.room.TypeConverters
         WastedFoodEntity::class,
         UnreadableNotificationEntity::class,
     ],
-    version = 4
+    version = 5
 )
 @TypeConverters(DatabaseTypeConverter::class)
 abstract class EatzyDatabase : RoomDatabase() {
