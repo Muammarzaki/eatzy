@@ -1,14 +1,5 @@
 <resources>
     <string name="app_name">EaTzy</string>
-
-    <string-array name="food_unit">
-        <item>Kilogram</item>
-        <item>PCS</item>
-        <item>Liter</item>
-        <item>Bungkus</item>
-        <item>Porsi</item>
-    </string-array>
-
     <string name="food_option_stock" >Stok Makanan</string>
     <string name="food_option_wasted" >Sisa Makanan</string>
     <string name="distribution_send">Kirim</string>
@@ -61,4 +52,6 @@
     <string name="food_form_label">Food Form</string>
     <string name="submit_label">Submit</string>
     <string name="type_label">Type</string>
+    <string name="continue_button">Lanjutkan</string>
+    <string name="distributing_success_message">Item dalam proses pengiriman</string>
 </resources>
