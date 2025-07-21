@@ -29,6 +29,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -180,33 +182,24 @@ class MainViewModel(private val repository: DataRepository) : ViewModel() {
     private val _chartData = MutableStateFlow<FoodWasteChartData?>(null)
     val summaryChartData: StateFlow<FoodWasteChartData?> = _chartData.asStateFlow()
 
+    private val _currentYear = MutableStateFlow<String?>(null)
+    val currentYear: StateFlow<String?> = _currentYear.asStateFlow()
+
+    private val _dataWastedFoodEachMonth = MutableStateFlow<List<WastedFoodTrend>>(emptyList())
+    val dataWastedFoodEachMonth: StateFlow<List<WastedFoodTrend>> =
+        _dataWastedFoodEachMonth.asStateFlow()
 
     private fun fetchChartData() {
         viewModelScope.launch {
-            val data = repository.getFoodWasteChartData()
-            _chartData.value = data
+            repository.getFoodWasteChartData().collect {
+                _chartData.value = it
+            }
         }
     }
-
-    private val _currentYear = MutableStateFlow<String?>(null)
-    val currentYear: StateFlow<String?> = _currentYear.asStateFlow()
 
     fun setCurrentYear(year: String) {
         _currentYear.value = year
     }
-
-
-    private val _dataWastedFoodEachMonth = MutableStateFlow<List<WastedFoodTrend>>(emptyList())
-    val dataWastedFoodEachMonth: StateFlow<List<WastedFoodTrend>> = _dataWastedFoodEachMonth
-
-    fun loadWastedFoodEachMonth() {
-        val year = _currentYear.value ?: return
-        viewModelScope.launch {
-            val result = repository.getWastedFoodEachMonth(year)
-            _dataWastedFoodEachMonth.value = result
-        }
-    }
-
 
     companion object {
         val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
@@ -226,10 +219,15 @@ class MainViewModel(private val repository: DataRepository) : ViewModel() {
 
     init {
         fetchChartData()
-        setCurrentYear(getCurrentYear())
-    }
+        val currentYear = Calendar.getInstance().get(Calendar.YEAR).toString()
+        _currentYear.value = currentYear
 
-    private fun getCurrentYear(): String {
-        return Calendar.getInstance().get(Calendar.YEAR).toString()
+        viewModelScope.launch {
+            _currentYear.filterNotNull().collectLatest { year ->
+                repository.getWastedFoodEachMonth(year).collect {
+                    _dataWastedFoodEachMonth.value = it
+                }
+            }
+        }
     }
 }

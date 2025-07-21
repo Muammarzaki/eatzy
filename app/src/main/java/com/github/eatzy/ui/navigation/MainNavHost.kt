@@ -41,6 +41,8 @@ fun MainNavHost(
     viewModel: MainViewModel,
     bottomBar: @Composable () -> Unit = {}
 ) {
+    var distributionTabState by remember { mutableStateOf(DistributionOption.Send) }
+    var foodTabState by remember { mutableStateOf(FoodOption.STOCK) }
     NavHost(
         navController = navController,
         startDestination = Route.SplashScreen.path,
@@ -85,7 +87,6 @@ fun MainNavHost(
             val wastedTrend by viewModel.dataWastedFoodEachMonth.collectAsState()
             LaunchedEffect(Unit) {
                 viewModel.selectUnit(FoodUnit.KILOGRAM)
-                viewModel.loadWastedFoodEachMonth()
             }
             HomeScreen(
                 chartData = chartData,
@@ -101,9 +102,8 @@ fun MainNavHost(
             )
         }
         composable(Route.FoodListScreen.path) {
-            var tabState by remember { mutableStateOf(FoodOption.STOCK) }
             val lazyFood =
-                if (tabState == FoodOption.STOCK) viewModel.foodItemsCard.collectAsLazyPagingItems()
+                if (foodTabState == FoodOption.STOCK) viewModel.foodItemsCard.collectAsLazyPagingItems()
                 else viewModel.wastedFoods.collectAsLazyPagingItems()
             ListFoodScreen(
                 onNotificationClick = {
@@ -113,27 +113,26 @@ fun MainNavHost(
                     navController.navigate(Route.FormScreen.createRoute(it))
                 },
                 bottomBar = bottomBar,
-                tabState = tabState,
+                tabState = foodTabState,
                 onTabChange = {
-                    tabState = it
+                    foodTabState = it
                 },
                 lazyItems = lazyFood,
                 onCardClicked = { id ->
-                    navController.navigate(Route.FormScreen.createRoute(tabState, id))
+                    navController.navigate(Route.FormScreen.createRoute(foodTabState, id))
                 }
             )
         }
         composable(Route.DistributionScreen.path) {
-            var tabState by remember { mutableStateOf(DistributionOption.Send) }
             val lazyDistributionEntry =
-                if (tabState == DistributionOption.Send) viewModel.unDistributedWastedFood.collectAsLazyPagingItems() else viewModel.distributedWastedFood.collectAsLazyPagingItems()
+                if (distributionTabState == DistributionOption.Send) viewModel.unDistributedWastedFood.collectAsLazyPagingItems() else viewModel.distributedWastedFood.collectAsLazyPagingItems()
             ListDistributionScreen(
                 onNotificationClick = {
                     navController.navigate(Route.NotificationScreen.path)
                 },
                 bottomBar = bottomBar,
                 onTabChange = {
-                    tabState = it
+                    distributionTabState = it
                 },
                 lazyItems = lazyDistributionEntry,
                 onCardClick = {

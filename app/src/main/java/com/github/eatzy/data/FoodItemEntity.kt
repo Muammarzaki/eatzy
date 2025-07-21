@@ -23,7 +23,7 @@ import java.util.Date
 data class FoodItemEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
-    val id: Int = 0,
+    var id: Int = 0,
     @ColumnInfo(name = "business_id", index = true)
     val businessId: Int,
     @ColumnInfo(name = "food_name")

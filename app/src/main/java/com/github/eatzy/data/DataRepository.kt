@@ -189,7 +189,6 @@ class DataRepository(private val eatzyDao: EatzyDao) : BusinessUseCase {
 
     override suspend fun saveFoodStock(foodItem: FoodItem, businessId: Int) {
         val foodItemEntity = FoodItemEntity(
-            id = foodItem.id ?: -1,
             foodName = foodItem.foodName,
             initialQuantity = foodItem.initialQuantity,
             unit = foodItem.unit,
@@ -198,11 +197,14 @@ class DataRepository(private val eatzyDao: EatzyDao) : BusinessUseCase {
             inputDate = Date(),
             foodType = foodItem.foodType
         )
-        if (foodItemEntity.id > 0) {
-            eatzyDao.updateFoodItem(
-                foodItemEntity
-            )
-            return
+        foodItem.id?.let {
+            if (it > 0) {
+                foodItemEntity.id = it
+                eatzyDao.updateFoodItem(
+                    foodItemEntity
+                )
+                return
+            }
         }
         eatzyDao.addFoodItem(
             foodItemEntity
@@ -211,7 +213,6 @@ class DataRepository(private val eatzyDao: EatzyDao) : BusinessUseCase {
 
     override suspend fun saveWastedFood(wastedFood: WastedFood) {
         val wastedFoodEntity = WastedFoodEntity(
-            id = wastedFood.id ?: -1,
             foodItemId = wastedFood.foodItemId,
             leftoverInputDate = wastedFood.leftoverInputDate ?: Date(),
             leftoverQuantity = wastedFood.leftoverQuantity,
@@ -221,11 +222,14 @@ class DataRepository(private val eatzyDao: EatzyDao) : BusinessUseCase {
             form = wastedFood.form,
             status = LeftoverStatus.AVAILABLE
         )
-        if (wastedFoodEntity.id > 0) {
-            eatzyDao.updateWastedFood(
-                wastedFoodEntity
-            )
-            return
+        wastedFood.id?.let {
+            if (it > 0) {
+                wastedFoodEntity.id = it
+                eatzyDao.updateWastedFood(
+                    wastedFoodEntity
+                )
+                return
+            }
         }
         eatzyDao.addWastedFood(
             wastedFoodEntity
@@ -250,7 +254,6 @@ class DataRepository(private val eatzyDao: EatzyDao) : BusinessUseCase {
     override suspend fun saveUser(user: User): Int {
         return eatzyDao.addUser(
             UserEntity(
-                id = user.id ?: -1,
                 ownerName = user.name,
                 email = user.email,
                 phoneNumber = user.phoneNumber
@@ -261,10 +264,9 @@ class DataRepository(private val eatzyDao: EatzyDao) : BusinessUseCase {
     override suspend fun saveBusiness(business: Business) {
         eatzyDao.addBusiness(
             BusinessEntity(
-                id = business.id ?: -1,
                 businessName = business.businessName,
                 address = business.address,
-                userId = business.userId ?: -1
+                userId = business.userId ?: return
             )
         )
     }
@@ -321,9 +323,9 @@ class DataRepository(private val eatzyDao: EatzyDao) : BusinessUseCase {
         }
     }
 
-    suspend fun getFoodWasteChartData() = eatzyDao.getFoodWasteChartData()
+    fun getFoodWasteChartData() = eatzyDao.getFoodWasteChartData()
 
-    suspend fun getWastedFoodEachMonth(currentYear: String) =
+    fun getWastedFoodEachMonth(currentYear: String) =
         eatzyDao.getWastedFoodEachMonth(currentYear)
 
 }

@@ -26,7 +26,7 @@ import java.util.Date
 data class WastedFoodEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
-    val id: Int = 0,
+    var id: Int = 0,
     @ColumnInfo(name = "food_item_id", index = true)
     val foodItemId: Int,
     @ColumnInfo(name = "leftover_input_date")

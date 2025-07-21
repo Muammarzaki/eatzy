@@ -17,8 +17,8 @@ import androidx.room.PrimaryKey
     ]
 )
 data class BusinessEntity(
-    @PrimaryKey
-    val id: Int,
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
     @ColumnInfo(name = "user_id", index = true)
     val userId: Int,
     @ColumnInfo(name = "business_name")

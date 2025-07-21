@@ -11,6 +11,7 @@ import com.github.eatzy.domain.FoodUnit
 import com.github.eatzy.domain.FoodWasteChartData
 import com.github.eatzy.domain.LeftoverStatus
 import com.github.eatzy.domain.WastedFoodTrend
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface EatzyDao {
@@ -84,7 +85,7 @@ interface EatzyDao {
          AND id NOT IN (SELECT leftover_food_id FROM distributions)
       ) AS remaining"""
     )
-    suspend fun getFoodWasteChartData(): FoodWasteChartData
+    fun getFoodWasteChartData(): Flow<FoodWasteChartData>
 
     @Query(
         """
@@ -101,5 +102,5 @@ interface EatzyDao {
       month ASC
 """
     )
-    suspend fun getWastedFoodEachMonth(currentYear: String): List<WastedFoodTrend>
+    fun getWastedFoodEachMonth(currentYear: String): Flow<List<WastedFoodTrend>>
 }
