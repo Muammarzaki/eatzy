@@ -315,7 +315,7 @@ fun DistributionToggle(onOptionSelected: (DistributionOption) -> Unit = {}) {
     val context = LocalContext.current
     Toggle(
         options = DistributionOption.entries.toTypedArray(),
-        initialSelectedOption = DistributionOption.Send,
+        initialSelectedOption = DistributionOption.SEND,
         onOptionSelected = onOptionSelected,
         optionTextProvider = { it.getLabel(context) }
     )

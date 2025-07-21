@@ -4,13 +4,13 @@ import android.content.Context
 import com.github.eatzy.R
 
 enum class DistributionOption {
-    Send,
-    Sent;
+    SEND,
+    SENT;
 
     fun getLabel(context: Context): String {
         return when (this) {
-            Send -> context.getString(R.string.distribution_option_send)
-            Sent -> context.getString(R.string.distribution_option_sent)
+            SEND -> context.getString(R.string.distribution_option_send)
+            SENT -> context.getString(R.string.distribution_option_sent)
         }
     }
 }

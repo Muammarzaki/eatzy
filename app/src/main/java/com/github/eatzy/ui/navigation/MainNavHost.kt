@@ -41,7 +41,7 @@ fun MainNavHost(
     viewModel: MainViewModel,
     bottomBar: @Composable () -> Unit = {}
 ) {
-    var distributionTabState by remember { mutableStateOf(DistributionOption.Send) }
+    var distributionTabState by remember { mutableStateOf(DistributionOption.SEND) }
     var foodTabState by remember { mutableStateOf(FoodOption.STOCK) }
     NavHost(
         navController = navController,
@@ -125,7 +125,7 @@ fun MainNavHost(
         }
         composable(Route.DistributionScreen.path) {
             val lazyDistributionEntry =
-                if (distributionTabState == DistributionOption.Send) viewModel.unDistributedWastedFood.collectAsLazyPagingItems() else viewModel.distributedWastedFood.collectAsLazyPagingItems()
+                if (distributionTabState == DistributionOption.SEND) viewModel.unDistributedWastedFood.collectAsLazyPagingItems() else viewModel.distributedWastedFood.collectAsLazyPagingItems()
             ListDistributionScreen(
                 onNotificationClick = {
                     navController.navigate(Route.NotificationScreen.path)
