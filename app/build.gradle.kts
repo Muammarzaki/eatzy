@@ -45,6 +45,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.gson)
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.paging.compose)
     implementation(libs.ycharts)

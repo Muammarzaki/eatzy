@@ -5,6 +5,13 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.sqlite.db.SupportSQLiteDatabase
+import com.github.eatzy.R
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Database(
     entities = [
@@ -32,11 +39,32 @@ abstract class EatzyDatabase : RoomDatabase() {
                     context.applicationContext,
                     EatzyDatabase::class.java,
                     "eatzy_database"
-                ).fallbackToDestructiveMigration(true)
+                )
+                    .addCallback(object : Callback() {
+                        override fun onCreate(db: SupportSQLiteDatabase) {
+                            super.onCreate(db)
+
+                            CoroutineScope(Dispatchers.IO).launch {
+                                val database = getInstance(context)
+                                val recipients = loadRecipientsFromRaw(context)
+                                database.eatzyDao().addRecipients(recipients)
+                            }
+                        }
+                    })
+                    .fallbackToDestructiveMigration(true)
                     .build()
                 INSTANCE = instance
                 instance
             }
+        }
+
+        fun loadRecipientsFromRaw(context: Context): List<RecipientEntity> {
+            val inputStream = context.resources.openRawResource(R.raw.recipients)
+            val jsonString = inputStream.bufferedReader().use { it.readText() }
+
+            val gson = Gson()
+            val type = object : TypeToken<List<RecipientEntity>>() {}.type
+            return gson.fromJson(jsonString, type)
         }
     }
 }

@@ -1,0 +1,18 @@
+[
+  {
+    "recipientName": "Panti Sosial Bahagia",
+    "address": "Jl. Mawar No. 15, Banda Aceh",
+    "contact": "081234567890",
+    "type": "SOCIAL",
+    "description": "Menampung lansia dan anak jalanan",
+    "currentScore": 75
+  },
+  {
+    "recipientName": "Kompos Ternak Hijau",
+    "address": "Jl. Peternakan No. 7, Lhokseumawe",
+    "contact": "082345678901",
+    "type": "LIVESTOCK_COMPOST",
+    "description": "Menerima limbah sayur dan buah",
+    "currentScore": 65
+  }
+]

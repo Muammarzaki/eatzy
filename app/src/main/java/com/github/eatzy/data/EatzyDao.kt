@@ -103,4 +103,7 @@ interface EatzyDao {
 """
     )
     fun getWastedFoodEachMonth(currentYear: String): Flow<List<WastedFoodTrend>>
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun addRecipients(recipients: List<RecipientEntity>)
 }
