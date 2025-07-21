@@ -266,7 +266,7 @@ fun MainNavHost(
         }
         composable(Route.SubmitTransitionScreen.path) {
             DistributionSuccessScreen {
-                navController.navigate(Route.DistributingScreen.path) {
+                navController.navigate(Route.DistributionScreen.path) {
                     popUpTo(Route.HomeScreen.path) {
                         inclusive = true
                     }

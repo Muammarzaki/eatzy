@@ -418,12 +418,13 @@ fun DistributionInfoCardPreview() {
 
 @Composable
 fun SimpleFoodCard(
+    modifier: Modifier = Modifier,
     foodName: String,
     date: String,
     size: Double,
     unit: String,
-    type: FoodForm,
-    modifier: Modifier = Modifier
+    form: FoodForm? = null,
+    type: String? = null
 ) {
     Card(
         modifier = modifier
@@ -465,15 +466,18 @@ fun SimpleFoodCard(
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(end = 8.dp),
                 )
-                Icon(
-                    painter = painterResource(id = if (type == FoodForm.SOLID) R.drawable.ic_solid else R.drawable.ic_liquid),
-                    contentDescription = type.name,
-                    tint = Color.Unspecified
-                )
+                if (form != null) {
+                    Icon(
+                        painter = painterResource(id = if (form == FoodForm.SOLID) R.drawable.ic_solid else R.drawable.ic_liquid),
+                        contentDescription = form.name,
+                        tint = Color.Unspecified
+                    )
+                }
             }
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable
@@ -488,15 +492,29 @@ fun SimpleFoodCardPreview() {
                 date = "12 December 2023",
                 size = 2.0,
                 unit = FoodUnit.KILOGRAM.getLabel(LocalContext.current),
-                type = FoodForm.SOLID
+                form = FoodForm.SOLID
             )
-            Spacer(modifier = Modifier.height(8.dp)) // Spacer for multiple cards in preview
+            Spacer(modifier = Modifier.height(8.dp))
+            SimpleFoodCard(
+                foodName = "Beef Rendang",
+                date = "12 December 2023",
+                size = 2.0,
+                unit = FoodUnit.KILOGRAM.getLabel(LocalContext.current),
+            )
+            Spacer(modifier = Modifier.height(8.dp))
             SimpleFoodCard(
                 foodName = "UHT Milk",
                 date = "15 January 2024",
                 size = 1.2,
                 unit = FoodUnit.LITER.getLabel(LocalContext.current),
-                type = FoodForm.LIQUID
+                form = FoodForm.LIQUID
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            SimpleFoodCard(
+                foodName = "UHT Milk",
+                date = "15 January 2024",
+                size = 1.2,
+                unit = FoodUnit.LITER.getLabel(LocalContext.current),
             )
         }
     }
@@ -504,18 +522,17 @@ fun SimpleFoodCardPreview() {
 
 @Composable
 fun DestinationDistributionCard(
+    isLocked: Boolean,
     modifier: Modifier = Modifier,
     name: String,
     address: String,
     description: String,
     onLockStatusChange: (Boolean) -> Unit
 ) {
-    var isLocked by remember { mutableStateOf(false) }
     Card(
         modifier = modifier
             .aspectRatio(19 / 7f)
             .clickable {
-                isLocked = !isLocked
                 onLockStatusChange(isLocked)
             },
         shape = RoundedCornerShape(12.dp),
@@ -587,7 +604,8 @@ private fun DestinationDistributionCardPreview() {
             name = "Destination Name",
             address = "Address",
             description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do usermod temper incident ut labor et do lore magna aliquot. This is an extended description to make it longer than a single sentence, fulfilling the requirement.",
-            onLockStatusChange = {}
+            onLockStatusChange = {},
+            isLocked = false
         )
     }
 }

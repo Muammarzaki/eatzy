@@ -733,7 +733,11 @@ fun WastedFoodInputForm(
     val context = LocalContext.current
     var foodName by remember { mutableStateOf(initialData?.foodItem ?: "") }
     var foodItemId by remember { mutableIntStateOf(initialData?.foodItemId ?: 0) }
-    val (selectedFoodForm, onFoodFormSelected) = remember { mutableStateOf(FoodForm.entries.first()) }
+    var selectedFoodForm by remember {
+        mutableStateOf(
+            initialData?.form ?: FoodForm.entries.first()
+        )
+    }
     var quantity by remember { mutableStateOf(initialData?.leftoverQuantity?.toString() ?: "") }
     var unit by remember { mutableStateOf(initialData?.unit ?: FoodUnit.KILOGRAM) }
     var condition by remember { mutableStateOf(initialData?.condition ?: FoodCondition.DISPOSED) }
@@ -868,10 +872,11 @@ fun WastedFoodInputForm(
             BigSwitch(
                 options = FoodForm.entries,
                 selectedOption = selectedFoodForm,
-                onOptionSelected = onFoodFormSelected,
+                onOptionSelected = { selectedFoodForm = it },
                 backgroundColor = MaterialTheme.colorScheme.onTertiaryContainer,
                 contentColor = Color.White,
-                selectedColor = MaterialTheme.colorScheme.inverseSurface
+                selectedColor = MaterialTheme.colorScheme.inverseSurface,
+                labelProvider = { it.getLabel(context) }
             )
 
             Spacer(modifier = Modifier.height(60.dp))
@@ -1039,29 +1044,6 @@ fun FoodInputForm(
                     expiryDate = calendar.time
                 }
             )
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                text = stringResource(R.string.food_form_label),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 5.dp),
-                textAlign = TextAlign.Start,
-                fontWeight = MaterialTheme.typography.displaySmall.fontWeight,
-                color = Color.White,
-                style = MaterialTheme.typography.bodyLarge
-            )
-
-            BigSwitch(
-                options = FoodForm.entries,
-                selectedOption = selectedFoodForm,
-                onOptionSelected = onFoodFormSelected,
-                backgroundColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                contentColor = Color.White,
-                selectedColor = MaterialTheme.colorScheme.inverseSurface
-            )
-
-            Spacer(modifier = Modifier.height(40.dp))
-
         }
         RegularButton(
             onClick = {

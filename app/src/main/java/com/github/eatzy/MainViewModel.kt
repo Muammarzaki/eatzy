@@ -10,6 +10,7 @@ import androidx.paging.cachedIn
 import androidx.paging.map
 import com.github.eatzy.data.DataRepository
 import com.github.eatzy.data.EatzyDatabase
+import com.github.eatzy.domain.FoodForm
 import com.github.eatzy.domain.FoodItem
 import com.github.eatzy.domain.FoodOption
 import com.github.eatzy.domain.FoodUnit
@@ -44,14 +45,15 @@ class MainViewModel(private val repository: DataRepository) : ViewModel() {
 
     val wastedFoods: Flow<PagingData<FoodItemCard>> = repository.getAllWasted()
         .map { pagingData ->
-            pagingData.map { foodItem ->
+            pagingData.map { wastedFood ->
                 FoodItemCard(
-                    foodName = foodItem.foodItem,
-                    date = foodItem.leftoverInputDate?.toStringDate("dd MMMM yyyy") ?: "",
-                    size = foodItem.leftoverQuantity,
-                    unit = foodItem.unit,
+                    foodName = wastedFood.foodItem,
+                    date = wastedFood.leftoverInputDate?.toStringDate("dd MMMM yyyy") ?: "",
+                    size = wastedFood.leftoverQuantity,
+                    unit = wastedFood.unit,
                     option = FoodOption.Wasted,
-                    id = foodItem.id ?: -1
+                    id = wastedFood.id ?: -1,
+                    form = wastedFood.form
                 )
             }
         }
@@ -66,7 +68,7 @@ class MainViewModel(private val repository: DataRepository) : ViewModel() {
                     size = foodItem.initialQuantity,
                     unit = foodItem.unit,
                     option = FoodOption.STOCK,
-                    id = foodItem.id ?: -1
+                    id = foodItem.id ?: 0,
                 )
             }
         }

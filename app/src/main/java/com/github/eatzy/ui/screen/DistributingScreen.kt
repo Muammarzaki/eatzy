@@ -117,7 +117,8 @@ fun DistributingScreen(
                             onLockStatusChange = {
                                 lockeStatus = !lockeStatus
                                 lockedId = item.id
-                            }
+                            },
+                            isLocked = lockeStatus
                         )
                     }
                 }

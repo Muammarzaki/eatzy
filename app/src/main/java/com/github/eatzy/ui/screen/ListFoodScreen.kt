@@ -36,7 +36,8 @@ data class FoodItemCard(
     val date: String,
     val size: Double,
     val unit: FoodUnit,
-    val type: FoodForm = FoodForm.SOLID,
+    val form: FoodForm? = null,
+    val type: String? = null,
     val option: FoodOption
 )
 
@@ -86,7 +87,7 @@ fun ListFoodScreen(
                             date = it.date,
                             size = it.size,
                             unit = it.unit.getLabel(context),
-                            type = it.type,
+                            form = it.form,
                         )
                     }
                 }
@@ -103,22 +104,22 @@ private fun ListFoodScreenPreview() {
         PagingData.from(
             listOf(
                 FoodItemCard(
-                    0,
-                    "Apple",
-                    "2023-10-27",
-                    1.0,
-                    FoodUnit.PIECE,
-                    FoodForm.SOLID,
-                    FoodOption.STOCK
+                    id = 0,
+                    foodName = "Apple",
+                    date = "2023-10-27",
+                    size = 1.0,
+                    unit = FoodUnit.PIECE,
+                    form = FoodForm.SOLID,
+                    option = FoodOption.STOCK,
                 ),
                 FoodItemCard(
-                    1,
-                    "Milk",
-                    "2023-10-28",
-                    1.0,
-                    FoodUnit.LITER,
-                    FoodForm.LIQUID,
-                    FoodOption.STOCK
+                    id = 1,
+                    foodName = "Milk",
+                    date = "2023-10-28",
+                    size = 1.0,
+                    unit = FoodUnit.LITER,
+                    form = FoodForm.LIQUID,
+                    option = FoodOption.STOCK
                 )
             )
         )
